@@ -1,20 +1,20 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Streamlit Tool Suite",
+    page_title="New Product Development",
     page_icon="🧰",
     layout="wide"
 )
 
-st.title("🧰 Streamlit Tool Suite")
+st.title("🧰 New Product Development Toolbox")
 st.markdown("---")
 
 st.markdown("""
-Welcome to your collection of interactive engineering tools.  
+This is a collection of interactive engineering tools specific to brush development.  
 Use the sidebar on the left to navigate between apps:
 
 - 📏 **Monofilament Coverage Calculator**  
-- 📊 **Seed Velocity Boxplot Viewer**
+- 📊 **Velocity Boxplot Viewer**
 
 ---
 
