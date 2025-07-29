@@ -70,4 +70,4 @@ for ax, (title, density, diameter, pattern) in zip(axs, configs):
     draw_monofilament(ax, positions, diameter, title, density, total_area, percent_coverage)
 
 plt.tight_layout()
-import ace_tools as tools; tools.display_dataframe_to_user(name="Monofilament Visual", dataframe=None)
+st.pyplot(fig)
