@@ -1,29 +1,53 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from plotly.colors import qualitative
 
-# Page config
-st.set_page_config(page_title="Velocity Boxplots", layout="wide")
+# Set up the Streamlit page
+st.set_page_config(page_title="Brush Velocity Boxplots", layout="wide")
 st.title("Velocity Distribution by Brush Type")
 
-# Load data
-df = pd.read_csv("data/Velocity_Boxplots.csv")
+st.write("""
+This boxplot shows the velocity distributions for different brush types. Each box represents the spread of velocity 
+measurements for that brush. Use this to compare consistency and central tendency across brush types.
+""")
 
-# Drop completely empty rows (common in Excel exports)
-df.dropna(how='all', inplace=True)
+# Load the CSV file
+df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' folder
 
-# Melt the wide-format DataFrame to long-format
+# Rename columns for clarity (optional)
+df.columns = ["AngleOn™ (in/sec)", "XT10 (in/sec)", "XT16 (in/sec)", "Brushlon (in/sec)"]
+
+# Convert wide to long format
 df_long = df.melt(var_name="Brush Type", value_name="Velocity (in/sec)")
-df_long.dropna(inplace=True)  # drop any rows with NaN velocity
 
-# Create boxplot
+# Clean brush names (optional)
+df_long["Brush Type"] = df_long["Brush Type"].str.replace("-Velocity", "")
+
+# Define consistent color palette
+color_sequence = qualitative.Plotly
+brush_order = ["AngleOn™", "XT10", "XT16", "Brushlon"]  # adjust as needed
+
+# Plot
 fig = px.box(
     df_long,
     x="Brush Type",
     y="Velocity (in/sec)",
-    points="all",  # Shows all the raw data points
-    title="Seed Ejection Velocity by Brush Type",
+    color="Brush Type",
+    color_discrete_sequence=color_sequence,
+    category_orders={"Brush Type": sorted(df_long["Brush Type"].unique())},  # optional consistent order
+    points="all",  # show all data points
     template="plotly_white"
 )
 
+# Layout tweaks
+fig.update_layout(
+    title="Velocity Distributions by Brush Type",
+    xaxis_title="Brush Type",
+    yaxis_title="Velocity (in/sec)",
+    legend_title="Brush Type",
+    height=600
+)
+
+# Display the plot
 st.plotly_chart(fig, use_container_width=True)
