@@ -2,11 +2,11 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-st.set_page_config(page_title="Seed Velocity Boxplots", layout="wide")
-st.title("Seed Velocity Distribution")
+st.set_page_config(page_title="Velocity Boxplots", layout="wide")
+st.title("Velocity Distribution")
 
 # Read from a local CSV file within the repo
-df = pd.read_csv("data/seed_velocity_data.csv")
+df = pd.read_csv("data/Velocity_Boxplots.csv")
 
 # Melt and clean
 df_long = df.melt(var_name="Material", value_name="Velocity (in/sec)")
