@@ -55,7 +55,7 @@ def draw_monofilament(ax, positions, diameter, title, density, total_area, perce
             transform=ax.transAxes, ha='center', fontsize=9)
 
 # Setup plot
-fig, axs = plt.subplots(1, 4, figsize=(28, 7), dpi=150)
+fig, axs = plt.subplots(1, 4, figsize=(100, 20), dpi=150)
 
 # Data for each brush type
 configs = [
