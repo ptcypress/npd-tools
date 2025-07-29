@@ -1,24 +1,30 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 
+# Page setup
 st.set_page_config(page_title="Velocity Boxplots", layout="wide")
-st.title("Velocity Distribution")
+st.title("Velocity Distributions by Material")
 
-# Read from a local CSV file within the repo
-df = pd.read_csv("data/Velocity_Boxplots.csv")
+# Load data
+csv_path = "data/Velocity_Boxplots.csv"  # Adjust path if needed
+df = pd.read_csv(csv_path)
 
-# Melt and clean
-df_long = df.melt(var_name="Material", value_name="Velocity (in/sec)")
-df_long = df_long.dropna()
+# Drop rows with all NaNs (if any)
+df.dropna(how='all', inplace=True)
+
+# Melt the DataFrame to long format for Plotly boxplot
+df_melted = df.melt(var_name="Material", value_name="Velocity (in/sec)")
+df_melted.dropna(inplace=True)
 
 # Plot
 fig = px.box(
-    df_long,
+    df_melted,
     x="Material",
     y="Velocity (in/sec)",
-    points="all",
-    title="Velocity Distribution by Material",
+    points="all",  # Show all points
+    title="Distribution of Seed Velocities by Material",
     template="plotly_white"
 )
+
 st.plotly_chart(fig, use_container_width=True)
