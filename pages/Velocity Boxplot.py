@@ -16,7 +16,7 @@ measurements for that brush. Use this to compare consistency and central tendenc
 df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' folder
 
 # Rename columns for clarity (optional)
-df.columns = ["AngleOn™ (in/sec)", "XT10 (in/sec)", "XT16 (in/sec)", "Brushlon (in/sec)"]
+df.columns = ["AngleOn™", "XT10", "XT16", "Brushlon"]
 
 # Convert wide to long format
 df_long = df.melt(var_name="Brush Type", value_name="Velocity (in/sec)")
