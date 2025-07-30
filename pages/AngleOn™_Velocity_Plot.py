@@ -65,7 +65,7 @@ fig.add_trace(go.Scatter(
     x=pressure_fit, y=velocity_fit,
     mode='lines',
     name='Polynomial Fit (Degree 3)',
-    line=dict(color='black', width=2),
+    line=dict(color='red', width=2),
     hoverinfo='skip'
 ))
 
