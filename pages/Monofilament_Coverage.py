@@ -1,53 +1,76 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
+import numpy as np
+import plotly.graph_objs as go
 from plotly.colors import qualitative
 
-# Set up the Streamlit page
-st.set_page_config(page_title="Brush Velocity Boxplots", layout="wide")
-st.title("Velocity Distribution by Brush Type")
+# App setup
+st.set_page_config(page_title="Monofilament Coverage", layout="wide")
+st.title("Monofilament Coverage: Percent Area vs EPI² & Filament Diameter")
 
 st.write("""
-This boxplot shows the velocity distributions for different brush types. Each box represents the spread of velocity 
-measurements for that brush. Use this to compare consistency and central tendency across brush types.
+Use the sliders in the sidebar to explore how different EPI² values affect theoretical coverage
+over a range of filament diameters. A horizontal dashed line shows the hexagonal packing limit (~90.69%).
 """)
 
-# Load the CSV file
-df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' folder
+# Sidebar controls
+st.sidebar.header("EPI² Values (ends per inch squared)")
+epi_inputs = {
+    "Brushlon": st.sidebar.slider("Brushlon", min_value=1_000, max_value=15_000, value=9_000, step=10),
+    "AngleOn™": st.sidebar.slider("AngleOn™", min_value=1_000, max_value=15_000, value=6_910, step=10),
+    "XT10": st.sidebar.slider("XT10", min_value=1_000, max_value=15_000, value=11_700, step=10),
+    "XT16": st.sidebar.slider("XT16", min_value=1_000, max_value=15_000, value=8_700, step=10),
+}
 
-# Rename columns for clarity (optional)
-df.columns = ["A-Velocity", "XT10-Velocity", "XT16-Velocity", "B-Velocity"]
+diameter_min, diameter_max = st.sidebar.slider("Diameter Range (inches)", 0.002, 0.022, (0.002, 0.022), step=0.0005)
 
-# Convert wide to long format
-df_long = df.melt(var_name="Brush Type", value_name="Velocity (in/sec)")
+# Calculate diameters to sample
+diameters = np.arange(diameter_min, diameter_max + 1e-9, 0.0001)
 
-# Clean brush names (optional)
-df_long["Brush Type"] = df_long["Brush Type"].str.replace("-Velocity", "")
+def calculate_area_coverage(epi_squared, diameters):
+    filament_area = np.pi * (diameters / 2) ** 2
+    return epi_squared * filament_area * 100
 
-# Define consistent color palette
-color_sequence = qualitative.Plotly
-brush_order = ["Brushlon", "AngleOn™", "XT10", "XT16", "A", "B"]  # adjust as needed
+# Build plot
+fig = go.Figure()
+colors = qualitative.Plotly
 
-# Plot
-fig = px.box(
-    df_long,
-    x="Brush Type",
-    y="Velocity (in/sec)",
-    color="Brush Type",
-    color_discrete_sequence=color_sequence,
-    category_orders={"Brush Type": sorted(df_long["Brush Type"].unique())},  # optional consistent order
-    points="all",  # show all data points
-    template="plotly_white"
-)
+# Plot each material line
+for idx, (label, epi_val) in enumerate(epi_inputs.items()):
+    coverage = calculate_area_coverage(epi_val, diameters)
+    fig.add_trace(go.Scatter(
+        x=diameters,
+        y=coverage,
+        mode='lines',
+        name=f"{label} ({epi_val})",
+        line=dict(color=colors[idx % len(colors)], width=2)
+    ))
 
-# Layout tweaks
+# Theoretical max limit
+fig.add_trace(go.Scatter(
+    x=[diameters[0], diameters[-1]],
+    y=[90.69, 90.69],
+    mode='lines',
+    name='Hexagonal Packing Limit (~90.69%)',
+    line=dict(color='gray', width=3, dash='dash')
+))
+
+# Reference vertical lines
+ref_diams = [0.0045, 0.006, 0.010, 0.016]
+for d in ref_diams:
+    fig.add_shape(
+        type='line',
+        x0=d, x1=d, y0=0, y1=100,
+        line=dict(color='darkgray', width=2, dash='dot'),
+        xref='x', yref='y'
+    )
+
 fig.update_layout(
-    title="Velocity Distributions by Brush Type",
-    xaxis_title="Brush Type",
-    yaxis_title="Velocity (in/sec)",
-    legend_title="Brush Type",
+    xaxis_title='Filament Diameter (in)',
+    yaxis_title='Percent Area Coverage',
+    yaxis=dict(range=[0, 100]),
+    title='Coverage vs Diameter for Various Materials',
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
     height=600
 )
 
-# Display the plot
 st.plotly_chart(fig, use_container_width=True)
