@@ -1,4 +1,4 @@
-import streamlit as st
+ociimport streamlit as st
 import pandas as pd
 import plotly.express as px
 from plotly.colors import qualitative
@@ -13,7 +13,7 @@ measurements for that brush. Use this to compare consistency and central tendenc
 """)
 
 # Load the CSV file
-df = pd.read_csv("data/velocity_data.csv")  # assumes file is in 'data/' folder
+df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' folder
 
 # Rename columns for clarity (optional)
 df.columns = ["A-Velocity", "XT10-Velocity", "XT16-Velocity", "B-Velocity"]
