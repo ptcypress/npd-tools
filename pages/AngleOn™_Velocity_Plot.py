@@ -81,7 +81,7 @@ fig.update_layout(
     yaxis_title="Velocity (in/sec)",
     title="Velocity vs Pressure with Polynomial Fit",
     height=600,
-    legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.01)
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.79)
 )
 
 st.plotly_chart(fig, use_container_width=True)
