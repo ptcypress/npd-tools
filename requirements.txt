@@ -4,4 +4,5 @@ plotly
 numpy
 matplotlib
 ace_tools
-sklearn
+sklearn.preprocessing
+sklearn.linear_model
