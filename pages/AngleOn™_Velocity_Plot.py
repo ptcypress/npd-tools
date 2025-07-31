@@ -33,7 +33,7 @@ velocity = np.array([
     0.83, 0.85, 0.87, 0.85, 0.84
 ])
 
-# Polynomial regression (degree 3 for best fit)
+# Polynomial regression (degree 3)
 poly = PolynomialFeatures(degree=3)
 X_poly = poly.fit_transform(pressure.reshape(-1, 1))
 model = LinearRegression()
@@ -44,9 +44,6 @@ velocity_fit = model.predict(poly.transform(pressure_fit.reshape(-1, 1)))
 # Streamlit app
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Velocity vs Pressure — Polynomial Fit")
-
-# Sidebar reference slider
-ref = st.sidebar.slider("Move reference lines", min_value=0.5, max_value=2.5, value=1.5, step=0.01)
 
 # Plot
 fig = go.Figure()
@@ -68,12 +65,6 @@ fig.add_trace(go.Scatter(
     line=dict(color='red', width=2),
     hoverinfo='skip'
 ))
-
-# Reference lines
-fig.add_shape(type="line", x0=ref, x1=ref, y0=0.5, y1=5,
-              line=dict(color="gray", width=2, dash="dash"))
-fig.add_shape(type="line", x0=0, x1=3, y0=ref, y1=ref,
-              line=dict(color="gray", width=2, dash="dash"))
 
 # Update layout
 fig.update_layout(
