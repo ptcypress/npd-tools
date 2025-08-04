@@ -96,7 +96,7 @@ if valid_intersection:
         mode='lines',  # must be lines for fill to show
         line=dict(width=0),
         fill='toself',
-        fillcolor='rgba(150,150,150,0.3)',
+        fillcolor='rgba(0,0,0,0)',
         name='Advantage Area (0 to Intersection)'
     ))
 
