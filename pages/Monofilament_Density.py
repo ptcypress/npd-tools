@@ -62,7 +62,7 @@ configs = [
     ("AngleOn™", 6912, 0.006, "hex"),
     ("XT10", 2273, 0.010, "grid"),
     ("XT16", 1136, 0.016, "grid"),
-    ("Brushlon", 9754, 0.0045, "hex"),
+    ("Competitor", 9754, 0.0045, "hex"),
 ]
 
 for ax, (title, density, diameter, pattern) in zip(axs, configs):
