@@ -14,14 +14,15 @@ st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure")
 
 # --- Load Data ---
-csv_path = "data/velocity_data.csv"
+csv_path = "/mnt/data/velocity_data.csv"
 df = pd.read_csv(csv_path)
+df.columns = df.columns.str.strip()  # clean up just in case
 
-# --- Dynamically identify relevant columns ---
+# --- Dynamically find column names ---
 pressure_col = [col for col in df.columns if "Pressure" in col][0]
 velocity_col = [col for col in df.columns if "Velocity" in col][0]
 
-# --- Filter only AngleOn™ and Competitor ---
+# --- Filter only AngleOn™ and Competitor data ---
 df = df[df['Brush'].isin(['AngleOn™', 'Competitor'])]
 
 angleon = df[df['Brush'] == 'AngleOn™']
@@ -57,43 +58,44 @@ with warnings.catch_warnings():
         x_intersect = None
         valid_intersection = False
 
-# --- Area under curve ---
+# --- Area Between Curves ---
 if valid_intersection:
     area, _ = quad(diff, 0, x_intersect)
 else:
     area = None
 
-# --- Generate fit lines ---
-x_range = np.linspace(0, df[pressure_col].max() + 0.5, 300)
-angleon_fit = [f(x) for x in x_range]
-competitor_fit = [g(x) for x in x_range]
+# --- Generate shared x-range for smooth plotting & shading ---
+x_range = np.linspace(0, df[pressure_col].max() + 0.5, 300).reshape(-1, 1)
+X_range_poly = poly.transform(x_range)
+y_pred_angleon = model1.predict(X_range_poly)
+y_pred_competitor = model2.predict(X_range_poly)
+
+# Subset only the values up to x_intersect for shading
+x_fill = np.linspace(0, x_intersect, 300).reshape(-1, 1)
+X_fill_poly = poly.transform(x_fill)
+x_vals = x_fill.flatten()
+y1_fill = model1.predict(X_fill_poly)
+y2_fill = model2.predict(X_fill_poly)
 
 # --- Create plot ---
 fig = go.Figure()
 
-# --- Shaded area between curves (0 to intersection) ---
+# --- Shaded area between curves from 0 to intersection ---
 if valid_intersection:
-    x_fill = np.linspace(0, x_intersect, 300)
-    y1 = np.array([f(x) for x in x_fill])
-    y2 = np.array([g(x) for x in x_fill])
-
-    fill_x = np.concatenate([x_fill, x_fill[::-1]])
-    fill_y = np.concatenate([y1, y2[::-1]])
-
     fig.add_trace(go.Scatter(
-        x=fill_x,
-        y=fill_y,
+        x=np.concatenate([x_vals, x_vals[::-1]]),
+        y=np.concatenate([y1_fill, y2_fill[::-1]]),
+        fill='toself',
         mode='lines',
         line=dict(width=0),
-        fill='toself',
         fillcolor='rgba(150,150,150,0.3)',
-        name='Advantage Area (0 to Intersection)'
+        name='Shaded Area (0 to Intersection)'
     ))
 
 # --- Add regression lines ---
-fig.add_trace(go.Scatter(x=x_range, y=angleon_fit, mode='lines',
+fig.add_trace(go.Scatter(x=x_range.flatten(), y=y_pred_angleon, mode='lines',
                          name='AngleOn™ Cubic Fit', line=dict(color='blue', width=3)))
-fig.add_trace(go.Scatter(x=x_range, y=competitor_fit, mode='lines',
+fig.add_trace(go.Scatter(x=x_range.flatten(), y=y_pred_competitor, mode='lines',
                          name='Competitor Cubic Fit', line=dict(color='red', width=3)))
 
 # --- Annotations ---
@@ -109,13 +111,13 @@ if valid_intersection:
     )
     fig.add_annotation(
         x=x_intersect / 2,
-        y=(np.max(y1) + np.max(y2)) / 2,
+        y=(np.max(y1_fill) + np.max(y2_fill)) / 2,
         text=f"Shaded Area = {area:.3f} in/sec·psi",
         showarrow=False,
         font=dict(size=14)
     )
 
-# --- Final layout ---
+# --- Layout ---
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
     yaxis_title="Velocity (in/sec)",
@@ -127,5 +129,5 @@ fig.update_layout(
     hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial")
 )
 
-# --- Display plot ---
+# --- Show plot ---
 st.plotly_chart(fig, use_container_width=True)
