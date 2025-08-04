@@ -27,8 +27,8 @@ if not required_columns.issubset(df.columns):
     st.stop()
 
 # --- Filter Data ---
-angleon = df[df['Brush'].str.lower() == 'angleon']
-competitor = df[df['Brush'].str.lower() == 'competitor']
+angleon = df[df['Brush'].str.contains('angleon', case=False, na=False)]
+competitor = df[df['Brush'].str.contains('competitor', case=False, na=False)]
 
 if angleon.empty or competitor.empty:
     st.error("AngleOn™ or Competitor data is missing from the CSV.")
