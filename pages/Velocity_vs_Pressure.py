@@ -118,7 +118,7 @@ fig.update_layout(
         spikesnap="cursor",
         spikecolor="lightgray",
         spikethickness=0.7,
-        spikedash="dot"  # Optional: makes the line dashed
+        spikedash="dot"
     ),
     yaxis=dict(
         showspikes=True,
@@ -126,9 +126,14 @@ fig.update_layout(
         spikesnap="cursor",
         spikecolor="lightgray",
         spikethickness=0.7,
-        spikedash="dot"  # Optional: makes the line dashed
+        spikedash="dot",
+        range=[0, None]  # 👈 Ensures no negative y values
     ),
-    hoverlabel=dict(bgcolor="rgba(0,0,0,0)", font_size=12, font_family="Arial")
+    hoverlabel=dict(
+        bgcolor="rgba(0,0,0,0)",
+        font_size=12,
+        font_family="Arial"
+    )
 )
 
 # --- Render ---
