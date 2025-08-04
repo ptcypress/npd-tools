@@ -5,29 +5,49 @@ import plotly.graph_objs as go
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from plotly.colors import qualitative
+import os
 
-# Load data
-df = pd.read_csv("data/velocity_data.csv")
+# Load CSV from local data folder
+file_path = os.path.join("data", "velocity_data.csv")
 
-# Ensure necessary columns
-required_cols = {"Brush", "Pressure", "Velocity"}
-if not required_cols.issubset(df.columns):
-    st.error("CSV must contain columns: Brush, Pressure, Velocity")
+if not os.path.exists(file_path):
+    st.error(f"CSV file not found at: {file_path}")
     st.stop()
 
-# Streamlit setup
+df = pd.read_csv(file_path)
+
+# Validate required columns
+required_cols = {"Brush", "Pressure", "Velocity"}
+if not required_cols.issubset(df.columns):
+    st.error("CSV must contain the following columns: Brush, Pressure, Velocity")
+    st.stop()
+
+# Standardize brush names to lowercase
+df["Brush"] = df["Brush"].str.strip().str.lower()
+
+# Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Velocity vs Pressure — Cubic Polynomial Fit")
 
-# Plot setup
-fig = go.Figure()
+# Define target brushes (case-insensitive)
+target_brushes = ["angleon", "competitor"]
 colors = qualitative.Plotly
-brushes = ["AngleOn", "Competitor"]
+fig = go.Figure()
 
-for i, brush in enumerate(brushes):
+# Iterate and plot
+for i, brush in enumerate(target_brushes):
     subset = df[df["Brush"] == brush]
+
+    if subset.empty:
+        st.warning(f"No data found for brush: {brush}")
+        continue
+
     x = subset["Pressure"].values
     y = subset["Velocity"].values
+
+    if len(x) < 4:
+        st.warning(f"Not enough data points to fit a cubic model for brush: {brush}")
+        continue
 
     # Fit cubic polynomial
     poly = PolynomialFeatures(degree=3)
@@ -36,25 +56,25 @@ for i, brush in enumerate(brushes):
     x_fit = np.linspace(x.min(), x.max(), 300)
     y_fit = model.predict(poly.transform(x_fit.reshape(-1, 1)))
 
-    # Raw data
+    # Plot raw data
     fig.add_trace(go.Scatter(
         x=x, y=y,
         mode='markers',
-        name=f'{brush} Data',
+        name=f'{brush.title()} Data',
         marker=dict(color=colors[i], size=8),
         hovertemplate='Pressure: %{x}<br>Velocity: %{y}<extra></extra>'
     ))
 
-    # Polynomial fit
+    # Plot fit
     fig.add_trace(go.Scatter(
         x=x_fit, y=y_fit,
         mode='lines',
-        name=f'{brush} Cubic Fit',
+        name=f'{brush.title()} Cubic Fit',
         line=dict(color=colors[i], width=2),
         hoverinfo='skip'
     ))
 
-# Final layout
+# Final plot layout
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
     yaxis_title="Velocity (in/sec)",
