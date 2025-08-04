@@ -13,10 +13,10 @@ st.markdown("""
 This is a collection of interactive engineering tools specific to brush development.  
 Use the sidebar on the left to navigate between apps:
 
--  **Velocity vs. Pressure**
 -  **Monofilament Coverage Calculator**  
 -  **Monofilament Density Plot**
 -  **Velocity Boxplot**
+-  **Velocity vs. Pressure**
 
 ---
 
