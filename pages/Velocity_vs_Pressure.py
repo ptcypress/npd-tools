@@ -47,8 +47,8 @@ angleon_fit = f(pressure_range)
 competitor_fit = g(pressure_range)
 
 # Streamlit layout
-st.set_page_config(page_title="Cubic Regression Comparison", layout="wide")
-st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
+st.set_page_config(page_title="Regression Comparison", layout="wide")
+st.title("Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
 
 # Plot
