@@ -81,21 +81,22 @@ competitor_fit = [g(x) for x in x_range]
 fig = go.Figure()
 
 # Shaded Area Between Curves (0 to x_intersect only)
+# --- Shaded Area Between Curves from x=0 to x_intersect ---
 if valid_intersection:
-    # Subset of x_range only up to intersection
-    x_fill = x_range[x_range <= x_intersect]
-    y1_fill = [f(x) for x in x_fill]
-    y2_fill = [g(x) for x in x_fill]
+    x_fill = np.linspace(0, x_intersect, 300)
+    y_f = np.array([f(x) for x in x_fill])
+    y_g = np.array([g(x) for x in x_fill])
 
+    # Concatenate to form closed loop for shading
     fill_x = np.concatenate([x_fill, x_fill[::-1]])
-    fill_y = np.concatenate([y1_fill, y2_fill[::-1]])
+    fill_y = np.concatenate([y_f, y_g[::-1]])
 
     fig.add_trace(go.Scatter(
         x=fill_x,
         y=fill_y,
         fill='toself',
         fillcolor='rgba(150,150,150,0.3)',
-        line=dict(color='rgba(255,255,255,0)'),
+        line=dict(color='rgba(255,255,255,0)'),  # invisible border
         hoverinfo='skip',
         name='Advantage Area (0 to Intersection)'
     ))
