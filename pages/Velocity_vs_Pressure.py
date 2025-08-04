@@ -7,22 +7,22 @@ from sklearn.preprocessing import PolynomialFeatures
 from plotly.colors import qualitative
 
 # Load data
-df = pd.read_csv("velocity_data.csv")
+df = pd.read_csv("C:/Users/cjm/OneDrive - Roto Frank FTT GmbH/Desktop/velocity_data.csv")
 
 # Ensure necessary columns
-required_cols = {"Brush", "Pressure", "Velocity"}
+required_cols = {"Brush", "Pressure (lbs/in²)", "Velocity (in/sec)"}
 if not required_cols.issubset(df.columns):
-    st.error("CSV must contain columns: Brush, Pressure, Velocity")
+    st.error("CSV must contain columns: Brush, Pressure (lbs/in²), Velocity (in/sec)")
     st.stop()
 
 # Streamlit setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
-st.title("Velocity vs Pressure — Cubic Polynomial Fit")
+st.title("Velocity vs Pressure")
 
 # Plot setup
 fig = go.Figure()
 colors = qualitative.Plotly
-brushes = ["AngleOn", "Competitor"]
+brushes = ["AngleOn™", "Competitor"]
 
 for i, brush in enumerate(brushes):
     subset = df[df["Brush"] == brush]
