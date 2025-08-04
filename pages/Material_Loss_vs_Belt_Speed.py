@@ -91,7 +91,13 @@ fig.update_layout(
     yaxis_title="Rate of Material Loss (in/min)",
     height=650,
     hovermode='x',
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="center",
+        x=0.5
+    ),
     xaxis=dict(
         type='linear',
         range=[6.3, 50],
@@ -112,7 +118,7 @@ fig.update_layout(
         spikecolor="lightgray",
         spikethickness=0.7,
         spikedash="dot",
-        tickformat=".4f"  # disables µ-style formatting
+        tickformat=".4f"
     ),
     hoverlabel=dict(
         bgcolor="rgba(0,0,0,0)",
@@ -121,10 +127,10 @@ fig.update_layout(
     )
 )
 
-# Annotation
+# Annotation (moved out of the way)
 fig.add_annotation(
-    x=40,
-    y=y_max_buffered * 0.95,
+    x=15,
+    y=y_max_buffered * 0.25,
     text=f"Shaded area = {area:.6f} (in·min⁻¹·in·sec⁻¹)",
     showarrow=False,
     font=dict(size=13)
