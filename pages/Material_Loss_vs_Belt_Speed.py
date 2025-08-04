@@ -41,11 +41,12 @@ def g(x_val):
 x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
 
 # Calculate area between curves from x_intersect to 50
-area, _ = quad(lambda x_val: abs(f(x_val) - g(x_val)), x_intersect, 50)
+area, _ = quad(lambda x_val: abs(f(x_val) - g(x_val)), 6.3, 50)
 
 # Predict over a range for plotting
-x_range = np.linspace(1, 55, 300).reshape(-1, 1)
+x_range = np.linspace(6.3, 50, 300).reshape(-1, 1)
 log_x_range = np.log(x_range)
+
 y_pred_angleon = model_angleon.predict(poly.transform(log_x_range))
 y_pred_competitor = model_competitor.predict(poly.transform(log_x_range))
 
