@@ -26,7 +26,7 @@ if not required_columns.issubset(df.columns):
     st.error(f"CSV must contain columns: {required_columns}")
     st.stop()
 
-# --- Filter Data ---
+# --- Filter Data with flexible string matching ---
 angleon = df[df['Brush'].str.contains('angleon', case=False, na=False)]
 competitor = df[df['Brush'].str.contains('competitor', case=False, na=False)]
 
@@ -94,19 +94,11 @@ if valid_intersection:
         name='Performance Advantage Area'
     ))
 
-# Fitted Curves
+# Fitted Curves Only (No raw data)
 fig.add_trace(go.Scatter(x=x_range, y=angleon_fit, mode='lines',
                          name='AngleOn™ Cubic Fit', line=dict(color='blue', width=3)))
 fig.add_trace(go.Scatter(x=x_range, y=competitor_fit, mode='lines',
                          name='Competitor Cubic Fit', line=dict(color='red', width=3)))
-
-# Raw Data
-fig.add_trace(go.Scatter(x=angleon['Pressure'], y=angleon['Velocity'],
-                         mode='markers', name='AngleOn™ Data',
-                         marker=dict(color='blue', size=6)))
-fig.add_trace(go.Scatter(x=competitor['Pressure'], y=competitor['Velocity'],
-                         mode='markers', name='Competitor Data',
-                         marker=dict(color='red', size=6)))
 
 # Annotations
 if valid_intersection:
