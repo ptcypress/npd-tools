@@ -13,15 +13,17 @@ st.markdown("""
 This is a collection of interactive engineering tools specific to brush development.  
 Use the sidebar on the left to navigate between apps:
 
-- 📏 **Monofilament Coverage Calculator**  
-- 📊 **Velocity Boxplot Viewer**
+-  **Velocity vs. Pressure**
+-  **Monofilament Coverage Calculator**  
+-  **Monofilament Density Plot**
+-  **Velocity Boxplot**
 
 ---
 
 ### 📌 How to Use
 - Choose an app from the sidebar.
 - Each app will load in its own view.
-- You can add new tools anytime by placing a `.py` file in the `pages/` folder.
+
 
 ---
 """)
