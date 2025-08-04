@@ -31,7 +31,7 @@ target_brushes = ["AngleOn™", "Competitor"]
 colors = qualitative.Plotly
 fig = go.Figure()
 
-# Iterate and plot
+# Iterate and plot cubic regression lines
 for i, brush in enumerate(target_brushes):
     subset = df[df["Brush"] == brush]
 
@@ -53,21 +53,12 @@ for i, brush in enumerate(target_brushes):
     x_fit = np.linspace(x.min(), x.max(), 300)
     y_fit = model.predict(poly.transform(x_fit.reshape(-1, 1)))
 
-    # Plot raw data
-    fig.add_trace(go.Scatter(
-        x=x, y=y,
-        mode='markers',
-        name=f'{brush} Data',
-        marker=dict(color=colors[i], size=8),
-        hovertemplate='Pressure: %{x}<br>Velocity: %{y}<extra></extra>'
-    ))
-
-    # Plot polynomial fit
+    # Plot only the regression line
     fig.add_trace(go.Scatter(
         x=x_fit, y=y_fit,
         mode='lines',
         name=f'{brush} Cubic Fit',
-        line=dict(color=colors[i], width=2),
+        line=dict(color=colors[i], width=3),
         hoverinfo='skip'
     ))
 
