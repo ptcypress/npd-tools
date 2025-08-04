@@ -14,22 +14,27 @@ st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure")
 
 # --- Load Data ---
-csv_path = "data/velocity_data.csv"
+csv_path = "/mnt/data/velocity_data.csv"
 df = pd.read_csv(csv_path)
 
-# --- Filter relevant data ---
+# --- Dynamically identify relevant columns ---
+pressure_col = [col for col in df.columns if "Pressure" in col][0]
+velocity_col = [col for col in df.columns if "Velocity" in col][0]
+
+# --- Filter only AngleOn™ and Competitor ---
 df = df[df['Brush'].isin(['AngleOn™', 'Competitor'])]
 
 angleon = df[df['Brush'] == 'AngleOn™']
 competitor = df[df['Brush'] == 'Competitor']
 
-x_angleon = angleon['Pressure (lbs/in²)'].values.reshape(-1, 1)
-y_angleon = angleon['Velocity (in/sec)'].values
+# --- Prepare data for regression ---
+x_angleon = angleon[pressure_col].values.reshape(-1, 1)
+y_angleon = angleon[velocity_col].values
 
-x_comp = competitor['Pressure (lbs/in²)'].values.reshape(-1, 1)
-y_comp = competitor['Velocity (in/sec)'].values
+x_comp = competitor[pressure_col].values.reshape(-1, 1)
+y_comp = competitor[velocity_col].values
 
-# --- Polynomial Fit ---
+# --- Polynomial Regression (Cubic) ---
 poly = PolynomialFeatures(degree=3)
 X_angleon_poly = poly.fit_transform(x_angleon)
 X_comp_poly = poly.fit_transform(x_comp)
@@ -37,35 +42,36 @@ X_comp_poly = poly.fit_transform(x_comp)
 model1 = LinearRegression().fit(X_angleon_poly, y_angleon)
 model2 = LinearRegression().fit(X_comp_poly, y_comp)
 
-# --- Functions ---
+# --- Fit functions ---
 def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
 def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
 def diff(x): return f(x) - g(x)
 
-# --- Find Intersection ---
+# --- Find intersection ---
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         x_intersect = fsolve(diff, x0=1.0)[0]
-        valid_intersection = True if 0 <= x_intersect <= df['Pressure (lbs/in²)'].max() else False
+        valid_intersection = True if 0 <= x_intersect <= df[pressure_col].max() else False
     except:
         x_intersect = None
         valid_intersection = False
 
-# --- Area Between Curves ---
+# --- Area under curve ---
 if valid_intersection:
     area, _ = quad(diff, 0, x_intersect)
 else:
     area = None
 
-# --- Build Plot ---
-x_range = np.linspace(0, df['Pressure (lbs/in²)'].max() + 0.5, 300)
+# --- Generate fit lines ---
+x_range = np.linspace(0, df[pressure_col].max() + 0.5, 300)
 angleon_fit = [f(x) for x in x_range]
 competitor_fit = [g(x) for x in x_range]
 
+# --- Create plot ---
 fig = go.Figure()
 
-# --- Shaded Area Between Curves ---
+# --- Shaded area between curves (0 to intersection) ---
 if valid_intersection:
     x_fill = np.linspace(0, x_intersect, 300)
     y1 = np.array([f(x) for x in x_fill])
@@ -84,7 +90,7 @@ if valid_intersection:
         name='Advantage Area (0 to Intersection)'
     ))
 
-# --- Regression Lines ---
+# --- Add regression lines ---
 fig.add_trace(go.Scatter(x=x_range, y=angleon_fit, mode='lines',
                          name='AngleOn™ Cubic Fit', line=dict(color='blue', width=3)))
 fig.add_trace(go.Scatter(x=x_range, y=competitor_fit, mode='lines',
@@ -109,7 +115,7 @@ if valid_intersection:
         font=dict(size=14)
     )
 
-# --- Layout ---
+# --- Final layout ---
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
     yaxis_title="Velocity (in/sec)",
@@ -121,4 +127,5 @@ fig.update_layout(
     hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial")
 )
 
+# --- Display plot ---
 st.plotly_chart(fig, use_container_width=True)
