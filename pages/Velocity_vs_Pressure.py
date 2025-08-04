@@ -112,9 +112,23 @@ fig.update_layout(
     hovermode='x',
     height=650,
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
-    xaxis=dict(showspikes=True, spikemode="across", spikesnap="cursor"),
-    yaxis=dict(showspikes=True, spikemode="across", spikesnap="cursor"),
-    hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial")
+    xaxis=dict(
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        spikecolor="lightgray",
+        spikethickness=0.7,
+        spikedash="dot"  # Optional: makes the line dashed
+    ),
+    yaxis=dict(
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        spikecolor="lightgray",
+        spikethickness=0.7,
+        spikedash="dot"  # Optional: makes the line dashed
+    ),
+    hoverlabel=dict(bgcolor="rgba(0,0,0,0)", font_size=12, font_family="Arial")
 )
 
 # --- Render ---
