@@ -26,7 +26,7 @@ X_poly = poly.fit_transform(log_x)
 model_angleon = LinearRegression().fit(X_poly, y_angleon)
 model_competitor = LinearRegression().fit(X_poly, y_competitor)
 
-# Define functions for integration
+# Define prediction functions
 poly_transform = lambda val: poly.transform(np.log(np.array([[val]])))
 
 def f(x_val):
@@ -37,18 +37,18 @@ def g(x_val):
     x_val = float(np.squeeze(x_val))
     return model_competitor.predict(poly_transform(x_val))[0]
 
-# Find intersection point
-x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
-
-# Calculate area between curves from x_intersect to 50
+# Area between curves from x = 6.3 to 50
 area, _ = quad(lambda x_val: abs(f(x_val) - g(x_val)), 6.3, 50)
 
-# Predict over a range for plotting
+# Predict over a restricted range for plotting
 x_range = np.linspace(6.3, 50, 300).reshape(-1, 1)
 log_x_range = np.log(x_range)
-
 y_pred_angleon = model_angleon.predict(poly.transform(log_x_range))
 y_pred_competitor = model_competitor.predict(poly.transform(log_x_range))
+
+# Determine max y for setting fixed axis range with buffer
+y_max = max(y_pred_angleon.max(), y_pred_competitor.max())
+y_max_buffered = y_max * 1.05
 
 # Streamlit layout
 st.set_page_config(page_title="Durability vs Belt Speed", layout="wide")
@@ -94,22 +94,38 @@ fig.update_layout(
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
     xaxis=dict(
         type='linear',
-        range=[0, 55],
-        showspikes=True, spikemode="across", spikesnap="cursor",
-        showline=True, spikecolor="lightgray", spikethickness=1
+        range=[6.3, 50],
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        showline=True,
+        spikecolor="lightgray",
+        spikethickness=0.7,
+        spikedash="dot"
     ),
     yaxis=dict(
-        showspikes=True, spikemode="across", spikesnap="cursor",
-        showline=True, spikecolor="lightgray", spikethickness=1
+        range=[0, y_max_buffered],
+        showspikes=True,
+        spikemode="across",
+        spikesnap="cursor",
+        showline=True,
+        spikecolor="lightgray",
+        spikethickness=0.7,
+        spikedash="dot",
+        tickformat=".4f"  # disables µ-style formatting
     ),
-    hoverlabel=dict(bgcolor="rgba(0,0,0,0)", font_size=12, font_family="Arial")
+    hoverlabel=dict(
+        bgcolor="rgba(0,0,0,0)",
+        font_size=12,
+        font_family="Arial"
+    )
 )
 
 # Annotation
 fig.add_annotation(
     x=40,
-    y=max(y_pred_angleon.max(), y_pred_competitor.max()),
-    text=f"Shaded area = {area:.3f} (in·min⁻¹·in·sec⁻¹)",
+    y=y_max_buffered * 0.95,
+    text=f"Shaded area = {area:.6f} (in·min⁻¹·in·sec⁻¹)",
     showarrow=False,
     font=dict(size=13)
 )
@@ -117,10 +133,9 @@ fig.add_annotation(
 # Caption
 st.markdown("""
 This chart compares the **rate of material loss** across belt speeds for two materials.
-The shaded area between the curves, from their intersection to a belt speed of 50 in/sec,
-represents the **cumulative durability advantage** of one material over the other.
-A lower rate of material loss over a given range of belt speeds indicates superior wear resistance.
-This metric can help quantify longevity and reliability of materials in dynamic contact applications.
+The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
+Lower material loss indicates superior wear resistance under dynamic conditions.
 """)
 
+# Show plot
 st.plotly_chart(fig, use_container_width=True)
