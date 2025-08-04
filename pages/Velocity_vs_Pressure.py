@@ -29,8 +29,8 @@ model1 = LinearRegression().fit(X1_poly, y1)
 model2 = LinearRegression().fit(X2_poly, y2)
 
 # Define model functions
-def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
-def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
+def f(x): return model1.predict(poly.transform(np.array(x).reshape(-1, 1))).flatten()
+def g(x): return model2.predict(poly.transform(np.array(x).reshape(-1, 1))).flatten()
 def diff(x): return f(x) - g(x)
 
 # Find intersection point
