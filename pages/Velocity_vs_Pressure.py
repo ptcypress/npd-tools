@@ -25,12 +25,10 @@ model_competitor = LinearRegression().fit(X_poly, y_competitor)
 
 # Define functions for integration
 def f(x_val):
-    x_val = float(np.squeeze(x_val))
-    return model_angleon.predict(poly.transform([[x_val]]))[0]
+    return model_angleon.predict(poly.transform(np.array([[x_val]])))[0]
 
 def g(x_val):
-    x_val = float(np.squeeze(x_val))
-    return model_competitor.predict(poly.transform([[x_val]]))[0]
+    return model_competitor.predict(poly.transform(np.array([[x_val]])))[0]
 
 # Find intersection point
 x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
@@ -80,8 +78,8 @@ fig.add_trace(go.Scatter(
 
 # Update layout
 fig.update_layout(
-    xaxis_title="Belt Speed",
-    yaxis_title="Rate of Material Loss",
+    xaxis_title="Belt Speed (in/sec)",
+    yaxis_title="Rate of Material Loss (in/min)",
     height=650,
     hovermode='x',
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
@@ -101,7 +99,7 @@ fig.update_layout(
 fig.add_annotation(
     x=40,
     y=max(y_pred_angleon.max(), y_pred_competitor.max()),
-    text=f"Shaded area = {area:.3f} (units²)",
+    text=f"Shaded area = {area:.3f} (in·min⁻¹·in·sec⁻¹)",
     showarrow=False,
     font=dict(size=13)
 )
@@ -109,8 +107,9 @@ fig.add_annotation(
 # Caption
 st.markdown("""
 This chart compares the **rate of material loss** across belt speeds for two materials.
-The shaded area between the curves, from their intersection to a belt speed of 50,
-represents the **cumulative durability advantage** of one material over the other.
+The shaded area between the curves, from their intersection to a belt speed of 50 in/sec,
+represents the **cumulative durability advantage** of one material over the other,
+expressed in terms of in/min over a range of operating speeds.
 """)
 
 st.plotly_chart(fig, use_container_width=True)
