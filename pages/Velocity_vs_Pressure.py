@@ -8,7 +8,7 @@ from scipy.integrate import quad
 from scipy.optimize import fsolve
 import warnings
 
-# --- Page Configuration ---
+# --- Page Setup ---
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure")
@@ -21,17 +21,18 @@ except FileNotFoundError:
     st.error(f"CSV file not found at path: {csv_path}")
     st.stop()
 
-required_columns = {'Brush', 'Pressure', 'Velocity'}
-if not required_columns.issubset(df.columns):
-    st.error(f"CSV must contain columns: {required_columns}")
+required_cols = {'Brush', 'Pressure', 'Velocity'}
+if not required_cols.issubset(df.columns):
+    st.error(f"CSV is missing required columns: {required_cols}")
+    st.dataframe(df)
     st.stop()
 
-# --- Filter Data with flexible string matching ---
+# --- Filter Data (case insensitive, flexible) ---
 angleon = df[df['Brush'].str.contains('angleon', case=False, na=False)]
 competitor = df[df['Brush'].str.contains('competitor', case=False, na=False)]
 
 if angleon.empty or competitor.empty:
-    st.error("AngleOn™ or Competitor data is missing from the CSV.")
+    st.error("AngleOn™ or Competitor data is missing or misnamed in the CSV.")
     st.dataframe(df)
     st.stop()
 
@@ -41,7 +42,7 @@ y_angleon = angleon['Velocity'].values
 x_comp = competitor['Pressure'].values.reshape(-1, 1)
 y_comp = competitor['Velocity'].values
 
-# --- Polynomial Regression (Cubic) ---
+# --- Polynomial Fit ---
 poly = PolynomialFeatures(degree=3)
 X_angleon_poly = poly.fit_transform(x_angleon)
 X_comp_poly = poly.fit_transform(x_comp)
@@ -49,12 +50,12 @@ X_comp_poly = poly.fit_transform(x_comp)
 model1 = LinearRegression().fit(X_angleon_poly, y_angleon)
 model2 = LinearRegression().fit(X_comp_poly, y_comp)
 
-# --- Prediction Functions ---
+# --- Functions ---
 def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
 def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
 def diff(x): return f(x) - g(x)
 
-# --- Solve for Intersection ---
+# --- Find Intersection ---
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
@@ -72,56 +73,57 @@ if valid_intersection:
 else:
     area = None
 
-# --- Prepare Plot Data ---
+# --- Build Plot ---
 x_range = np.linspace(0, max(df['Pressure']) + 0.5, 300)
 angleon_fit = [f(x) for x in x_range]
 competitor_fit = [g(x) for x in x_range]
 
-# --- Plotly Visualization ---
 fig = go.Figure()
 
-# Shaded Area Between Curves (0 to x_intersect only)
-# --- Shaded Area Between Curves from x=0 to x_intersect ---
+# --- Shaded Area Between Curves (0 to x_intersect) ---
 if valid_intersection:
     x_fill = np.linspace(0, x_intersect, 300)
-    y_f = np.array([f(x) for x in x_fill])
-    y_g = np.array([g(x) for x in x_fill])
+    y1 = np.array([f(x) for x in x_fill])
+    y2 = np.array([g(x) for x in x_fill])
 
-    # Concatenate to form closed loop for shading
     fill_x = np.concatenate([x_fill, x_fill[::-1]])
-    fill_y = np.concatenate([y_f, y_g[::-1]])
+    fill_y = np.concatenate([y1, y2[::-1]])
 
     fig.add_trace(go.Scatter(
         x=fill_x,
         y=fill_y,
         fill='toself',
+        mode='none',
         fillcolor='rgba(150,150,150,0.3)',
-        line=dict(color='rgba(255,255,255,0)'),  # invisible border
-        hoverinfo='skip',
         name='Advantage Area (0 to Intersection)'
     ))
 
-# Fitted Curves Only (No raw data)
+# --- Regression Lines ---
 fig.add_trace(go.Scatter(x=x_range, y=angleon_fit, mode='lines',
                          name='AngleOn™ Cubic Fit', line=dict(color='blue', width=3)))
 fig.add_trace(go.Scatter(x=x_range, y=competitor_fit, mode='lines',
                          name='Competitor Cubic Fit', line=dict(color='red', width=3)))
 
-# Annotations
+# --- Annotations ---
 if valid_intersection:
-    fig.add_annotation(x=x_intersect, y=g(x_intersect),
-                       text=f"Intersection @ {x_intersect:.2f} psi",
-                       showarrow=True, arrowhead=3, ax=40, ay=-40)
-
     fig.add_annotation(
-        x=x_range[len(x_range) // 2],
-        y=(max(angleon_fit) + max(competitor_fit)) / 2,
-        text=f"Total Advantage Area = {area:.3f} in/sec·psi",
+        x=x_intersect,
+        y=g(x_intersect),
+        text=f"Intersection @ {x_intersect:.2f} psi",
+        showarrow=True,
+        arrowhead=3,
+        ax=40,
+        ay=-40
+    )
+    fig.add_annotation(
+        x=x_intersect / 2,
+        y=(np.max(y1) + np.max(y2)) / 2,
+        text=f"Shaded Area = {area:.3f} in/sec·psi",
         showarrow=False,
         font=dict(size=14)
     )
 
-# Final Layout
+# --- Layout ---
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
     yaxis_title="Velocity (in/sec)",
