@@ -12,14 +12,14 @@ csv_path = "data/velocity_data.csv"
 df = pd.read_csv(csv_path)
 
 # Filter data
-angleon = df[df['Brush'] == 'AngleOn\u2122']
+angleon = df[df['Brush'] == 'AngleOn']
 competitor = df[df['Brush'] == 'Competitor']
 
-x_angleon = angleon['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
-y_angleon = angleon['Velocity (in/sec)'].values
+x_angleon = angleon['Pressure'].values.reshape(-1, 1)
+y_angleon = angleon['Velocity'].values
 
-x_comp = competitor['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
-y_comp = competitor['Velocity (in/sec)'].values
+x_comp = competitor['Pressure'].values.reshape(-1, 1)
+y_comp = competitor['Velocity'].values
 
 # Polynomial model (cubic)
 poly = PolynomialFeatures(degree=3)
