@@ -110,7 +110,7 @@ fig.update_layout(
         showspikes=True, spikemode="across", spikesnap="cursor",
         showline=True, spikecolor="lightgray", spikethickness=1
     ),
-    hoverlabel=dict(bgcolor="rgba(255,255,255,0.8)", font_size=12, font_family="Arial")
+    hoverlabel=dict(bgcolor="rgba(0,0,0,0)", font_size=12, font_family="Arial")
 )
 
 st.plotly_chart(fig, use_container_width=True)
