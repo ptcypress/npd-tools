@@ -11,45 +11,42 @@ from scipy.optimize import fsolve
 csv_path = "data/velocity_data.csv"
 df = pd.read_csv(csv_path)
 
-# Filter data
-angleon = df[df['Brush'] == 'AngleOn']
-competitor = df[df['Brush'] == 'Competitor']
+# Pivot data so each brush has its own column
+pivot_df = df.pivot_table(index='Pressure', columns='Brush', values='Velocity').reset_index()
 
-x_angleon = angleon['Pressure'].values.reshape(-1, 1)
-y_angleon = angleon['Velocity'].values
-
-x_comp = competitor['Pressure'].values.reshape(-1, 1)
-y_comp = competitor['Velocity'].values
+# Extract x and y values
+x = pivot_df['Pressure'].values.reshape(-1, 1)
+y_angleon = pivot_df['AngleOn™'].values
+y_competitor = pivot_df['Competitor'].values
 
 # Polynomial model (cubic)
 poly = PolynomialFeatures(degree=3)
-X_angleon_poly = poly.fit_transform(x_angleon)
-X_comp_poly = poly.fit_transform(x_comp)
+X_poly = poly.fit_transform(x)
 
-model1 = LinearRegression().fit(X_angleon_poly, y_angleon)
-model2 = LinearRegression().fit(X_comp_poly, y_comp)
+model1 = LinearRegression().fit(X_poly, y_angleon)
+model2 = LinearRegression().fit(X_poly, y_competitor)
 
 # Define fit functions
-def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
-def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
+def f(x_val): return model1.predict(poly.transform(np.array(x_val).reshape(-1, 1))).flatten()
+def g(x_val): return model2.predict(poly.transform(np.array(x_val).reshape(-1, 1))).flatten()
 
-def diff(x): return f(x) - g(x)
+def diff(x_val): return f(x_val) - g(x_val)
 
 # Solve for intersection
 x_intersect = fsolve(diff, x0=1.0)[0]
 
 # Integrate area between functions up to intersection
-area, _ = quad(diff, 0, x_intersect)
+area, _ = quad(lambda x: f(x) - g(x), 0, x_intersect)
 
 # Prepare line plot data
 pressure_range = np.linspace(0, x_intersect + 0.5, 300)
-angleon_fit = [f(x) for x in pressure_range]
-competitor_fit = [g(x) for x in pressure_range]
+angleon_fit = f(pressure_range)
+competitor_fit = g(pressure_range)
 
 # Streamlit layout
 st.set_page_config(page_title="Cubic Regression Comparison", layout="wide")
-st.title("Cubic Regression Comparison: AngleOn\u2122 vs Competitor")
-st.subheader("Velocity vs Pressure — AngleOn\u2122 vs Competitor")
+st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
+st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
 
 # Plot
 fig = go.Figure()
@@ -69,7 +66,7 @@ fig.add_trace(go.Scatter(
 fig.add_trace(go.Scatter(
     x=pressure_range, y=angleon_fit,
     mode='lines',
-    name='AngleOn\u2122 Cubic Fit',
+    name='AngleOn™ Cubic Fit',
     line=dict(color='blue', width=3)
 ))
 
@@ -82,7 +79,7 @@ fig.add_trace(go.Scatter(
 
 # Annotate intersection point and area
 fig.add_annotation(
-    x=x_intersect, y=g(x_intersect),
+    x=x_intersect, y=g([x_intersect])[0],
     text=f"Intersection @ {x_intersect:.2f} psi",
     showarrow=True, arrowhead=3, ax=40, ay=-40
 )
