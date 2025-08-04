@@ -14,6 +14,9 @@ df = pd.read_csv(csv_path)
 # Pivot data so each brush has its own column
 pivot_df = df.pivot_table(index='Pressure', columns='Brush', values='Velocity').reset_index()
 
+# Remove rows with missing values for either brush
+pivot_df = pivot_df[['Pressure', 'AngleOn™', 'Competitor']].dropna()
+
 # Extract x and y values
 x = pivot_df['Pressure'].values.reshape(-1, 1)
 y_angleon = pivot_df['AngleOn™'].values
