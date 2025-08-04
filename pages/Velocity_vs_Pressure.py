@@ -8,7 +8,7 @@ from scipy.optimize import fsolve
 import streamlit as st
 
 # Load CSV from correct relative path
-file_path = "../data/velocity_data.csv"
+file_path = "data/velocity_data.csv"
 df = pd.read_csv(file_path)
 
 # Filter for the two brushes
