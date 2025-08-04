@@ -12,14 +12,14 @@ csv_path = "data/velocity_data.csv"
 df = pd.read_csv(csv_path)
 
 # Filter data
-angleon = df[df['Brush'] == 'AngleOn\u2122']
+angleon = df[df['Brush'] == 'AngleOn']
 competitor = df[df['Brush'] == 'Competitor']
 
-x_angleon = angleon['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
-y_angleon = angleon['Velocity (in/sec)'].values
+x_angleon = angleon['Pressure'].values.reshape(-1, 1)
+y_angleon = angleon['Velocity'].values
 
-x_comp = competitor['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
-y_comp = competitor['Velocity (in/sec)'].values
+x_comp = competitor['Pressure'].values.reshape(-1, 1)
+y_comp = competitor['Velocity'].values
 
 # Polynomial model (cubic)
 poly = PolynomialFeatures(degree=3)
@@ -47,7 +47,7 @@ angleon_fit = [f(x) for x in pressure_range]
 competitor_fit = [g(x) for x in pressure_range]
 
 # Streamlit layout
-st.set_page_config(page_title="Cubic Regression Comparison", layout="wide")
+st.set_page_config(page_title="Regression Comparison", layout="wide")
 st.title("Cubic Regression Comparison: AngleOn\u2122 vs Competitor")
 st.subheader("Velocity vs Pressure — AngleOn\u2122 vs Competitor")
 
