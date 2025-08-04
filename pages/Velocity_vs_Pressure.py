@@ -1,119 +1,110 @@
-import numpy as np
+import streamlit as st
 import pandas as pd
-import plotly.graph_objs as go
-from sklearn.linear_model import LinearRegression
+import numpy as np
+import plotly.graph_objects as go
 from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
 from scipy.integrate import quad
 from scipy.optimize import fsolve
-import streamlit as st
 
-# Load CSV from correct relative path
-file_path = "data/velocity_data.csv"
-df = pd.read_csv(file_path)
+# Load data
+csv_path = "data/velocity_data.csv"
+df = pd.read_csv(csv_path)
 
-# Filter for the two brushes
-angleon = df[df["Brush"] == "AngleOn™"]
-competitor = df[df["Brush"] == "Competitor"]
+# Filter data
+angleon = df[df['Brush'] == 'AngleOn\u2122']
+competitor = df[df['Brush'] == 'Competitor']
 
-x1 = angleon["Pressure"].values
-y1 = angleon["Velocity"].values
-x2 = competitor["Pressure"].values
-y2 = competitor["Velocity"].values
+x_angleon = angleon['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
+y_angleon = angleon['Velocity (in/sec)'].values
 
-# Fit cubic polynomial models
+x_comp = competitor['Pressure (lbs/in\xb2)'].values.reshape(-1, 1)
+y_comp = competitor['Velocity (in/sec)'].values
+
+# Polynomial model (cubic)
 poly = PolynomialFeatures(degree=3)
-X1_poly = poly.fit_transform(x1.reshape(-1, 1))
-X2_poly = poly.fit_transform(x2.reshape(-1, 1))
+X_angleon_poly = poly.fit_transform(x_angleon)
+X_comp_poly = poly.fit_transform(x_comp)
 
-model1 = LinearRegression().fit(X1_poly, y1)
-model2 = LinearRegression().fit(X2_poly, y2)
+model1 = LinearRegression().fit(X_angleon_poly, y_angleon)
+model2 = LinearRegression().fit(X_comp_poly, y_comp)
 
-# Define model functions
-def f(x): return model1.predict(poly.transform(np.array(x).reshape(-1, 1))).flatten()
-def g(x): return model2.predict(poly.transform(np.array(x).reshape(-1, 1))).flatten()
+# Define fit functions
+def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
+def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
+
 def diff(x): return f(x) - g(x)
 
-# Find intersection point
+# Solve for intersection
 x_intersect = fsolve(diff, x0=1.0)[0]
-area_between, _ = quad(lambda x: abs(f(x) - g(x)), 0, x_intersect)
 
-# Generate fitted data
-x_fit = np.linspace(min(x1.min(), x2.min()), max(x1.max(), x2.max()), 300)
-y1_fit = [f(xi) for xi in x_fit]
-y2_fit = [g(xi) for xi in x_fit]
+# Integrate area between functions up to intersection
+area, _ = quad(diff, 0, x_intersect)
 
-# Shaded region
-x_shade = np.linspace(0, x_intersect, 300)
-y_upper = np.maximum([f(xi) for xi in x_shade], [g(xi) for xi in x_shade])
-y_lower = np.minimum([f(xi) for xi in x_shade], [g(xi) for xi in x_shade])
+# Prepare line plot data
+pressure_range = np.linspace(0, x_intersect + 0.5, 300)
+angleon_fit = [f(x) for x in pressure_range]
+competitor_fit = [g(x) for x in pressure_range]
 
-# Build interactive plot
+# Streamlit layout
+st.set_page_config(page_title="Cubic Regression Comparison", layout="wide")
+st.title("Cubic Regression Comparison: AngleOn\u2122 vs Competitor")
+st.subheader("Velocity vs Pressure — AngleOn\u2122 vs Competitor")
+
+# Plot
 fig = go.Figure()
 
+# Add shaded area between curves
 fig.add_trace(go.Scatter(
-    x=x_fit, y=y1_fit, mode='lines', name="AngleOn™ Cubic Fit",
-    line=dict(color="blue", width=3)
+    x=np.concatenate([pressure_range, pressure_range[::-1]]),
+    y=np.concatenate([angleon_fit, competitor_fit[::-1]]),
+    fill='toself',
+    fillcolor='rgba(150,150,150,0.3)',
+    line=dict(color='rgba(255,255,255,0)'),
+    hoverinfo='skip',
+    name='Performance Advantage Area'
+))
+
+# Add regression lines
+fig.add_trace(go.Scatter(
+    x=pressure_range, y=angleon_fit,
+    mode='lines',
+    name='AngleOn\u2122 Cubic Fit',
+    line=dict(color='blue', width=3)
 ))
 
 fig.add_trace(go.Scatter(
-    x=x_fit, y=y2_fit, mode='lines', name="Competitor Cubic Fit",
-    line=dict(color="red", width=3)
+    x=pressure_range, y=competitor_fit,
+    mode='lines',
+    name='Competitor Cubic Fit',
+    line=dict(color='red', width=3)
 ))
 
-fig.add_trace(go.Scatter(
-    x=np.concatenate([x_shade, x_shade[::-1]]),
-    y=np.concatenate([y_upper, y_lower[::-1]]),
-    fill="toself",
-    fillcolor="rgba(100,100,100,0.2)",
-    line=dict(color="rgba(255,255,255,0)"),
-    hoverinfo="skip",
-    name="Performance Advantage Area"
-))
-
-# Annotate chart
+# Annotate intersection point and area
 fig.add_annotation(
-    x=x_intersect, y=f(x_intersect),
+    x=x_intersect, y=g(x_intersect),
     text=f"Intersection @ {x_intersect:.2f} psi",
-    showarrow=True, arrowhead=1, ax=0, ay=-40
+    showarrow=True, arrowhead=3, ax=40, ay=-40
 )
 
 fig.add_annotation(
-    x=0.5 * x_intersect, y=np.max(y_upper),
-    text=f"Total Advantage Area = {area_between:.3f} in/sec·psi",
+    x=pressure_range[len(pressure_range)//2],
+    y=(max(angleon_fit) + max(competitor_fit)) / 2,
+    text=f"Total Advantage Area = {area:.3f} in/sec·psi",
     showarrow=False,
-    font=dict(size=13, color="black"),
-    bgcolor="rgba(255,255,255,0.7)",
-    bordercolor="gray",
-    borderwidth=1
+    font=dict(size=14)
 )
 
-# Cursor reference lines
+# Add crosshairs and live cursor
 fig.update_layout(
-    xaxis=dict(
-        title="Pressure (lbs/in²)",
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-        spikecolor="grey",
-        spikethickness=1,
-        spikedash="dot"
-    ),
-    yaxis=dict(
-        title="Velocity (in/sec)",
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-        spikecolor="grey",
-        spikethickness=1,
-        spikedash="dot"
-    ),
-    title="Velocity vs Pressure — AngleOn™ vs Competitor",
-    height=600,
-    hovermode="x unified",
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.79)
+    xaxis_title="Pressure (lbs/in²)",
+    yaxis_title="Velocity (in/sec)",
+    hovermode='x',
+    height=650,
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
+    xaxis=dict(showspikes=True, spikemode="across", spikesnap="cursor", showline=True),
+    yaxis=dict(showspikes=True, spikemode="across", spikesnap="cursor", showline=True),
+    hoverlabel=dict(bgcolor="white", font_size=12, font_family="Arial")
 )
 
-# Display in Streamlit
-st.set_page_config(page_title="Velocity Comparison", layout="wide")
-st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.plotly_chart(fig, use_container_width=True)
