@@ -21,7 +21,7 @@ df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' fol
 #st.write(f"Number of columns: {len(df.columns)}")
 
 # Rename columns for clarity (optional)
-df.columns = ["AngleOn™", "XT10", "XT16", "Brushlon"]
+df.columns = ["AngleOn™", "XT10", "XT16", "Competitor"]
 
 # Convert wide to long format
 df_long = df.melt(var_name="Brush Type", value_name="Velocity (in/sec)")
@@ -31,7 +31,7 @@ df_long["Brush Type"] = df_long["Brush Type"].str.replace("-Velocity", "")
 
 # Define consistent color palette
 color_sequence = qualitative.Plotly
-brush_order = ["AngleOn™", "XT10", "XT16", "Brushlon"]  # adjust as needed
+brush_order = ["AngleOn™", "XT10", "XT16", "Competitor"]  # adjust as needed
 
 # Plot
 fig = px.box(
