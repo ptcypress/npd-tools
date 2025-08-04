@@ -22,14 +22,11 @@ if not required_cols.issubset(df.columns):
     st.error("CSV must contain the following columns: Brush, Pressure, Velocity")
     st.stop()
 
-# Standardize brush names to lowercase
-df["Brush"] = df["Brush"].str.strip().str.lower()
-
 # Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Velocity vs Pressure — Cubic Polynomial Fit")
 
-# Define target brushes (case-insensitive)
+# Define brushes to compare (EXACT match)
 target_brushes = ["AngleOn™", "Competitor"]
 colors = qualitative.Plotly
 fig = go.Figure()
@@ -39,14 +36,14 @@ for i, brush in enumerate(target_brushes):
     subset = df[df["Brush"] == brush]
 
     if subset.empty:
-        st.warning(f"No data found for brush: {brush}")
+        st.warning(f"No data found for brush: '{brush}'")
         continue
 
     x = subset["Pressure"].values
     y = subset["Velocity"].values
 
     if len(x) < 4:
-        st.warning(f"Not enough data points to fit a cubic model for brush: {brush}")
+        st.warning(f"Not enough data points to fit a cubic model for brush: '{brush}'")
         continue
 
     # Fit cubic polynomial
@@ -60,16 +57,16 @@ for i, brush in enumerate(target_brushes):
     fig.add_trace(go.Scatter(
         x=x, y=y,
         mode='markers',
-        name=f'{brush.title()} Data',
+        name=f'{brush} Data',
         marker=dict(color=colors[i], size=8),
         hovertemplate='Pressure: %{x}<br>Velocity: %{y}<extra></extra>'
     ))
 
-    # Plot fit
+    # Plot polynomial fit
     fig.add_trace(go.Scatter(
         x=x_fit, y=y_fit,
         mode='lines',
-        name=f'{brush.title()} Cubic Fit',
+        name=f'{brush} Cubic Fit',
         line=dict(color=colors[i], width=2),
         hoverinfo='skip'
     ))
@@ -78,7 +75,7 @@ for i, brush in enumerate(target_brushes):
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
     yaxis_title="Velocity (in/sec)",
-    title="Cubic Polynomial Fit: AngleOn vs Competitor",
+    title="Cubic Polynomial Fit: AngleOn™ vs Competitor",
     height=600,
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.79)
 )
