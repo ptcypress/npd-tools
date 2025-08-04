@@ -111,6 +111,7 @@ fig.update_layout(
     ),
     yaxis=dict(
         range=[0, y_max_buffered],
+        tickformat='e',
         showspikes=True,
         spikemode="across",
         spikesnap="cursor",
