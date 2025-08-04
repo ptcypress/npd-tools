@@ -17,20 +17,25 @@ x = df['Belt Speed'].values.reshape(-1, 1)
 y_angleon = df['AngleOn'].values
 y_competitor = df['Competitor'].values
 
-# Fit cubic polynomial models
+# Apply log transformation for modeling
+log_x = np.log(x)
+
+# Fit cubic polynomial models on log(x)
 poly = PolynomialFeatures(degree=3)
-X_poly = poly.fit_transform(x)
+X_poly = poly.fit_transform(log_x)
 model_angleon = LinearRegression().fit(X_poly, y_angleon)
 model_competitor = LinearRegression().fit(X_poly, y_competitor)
 
 # Define functions for integration
+poly_transform = lambda val: poly.transform(np.log(np.array([[val]])))
+
 def f(x_val):
     x_val = float(np.squeeze(x_val))
-    return model_angleon.predict(poly.transform([[x_val]]))[0]
+    return model_angleon.predict(poly_transform(x_val))[0]
 
 def g(x_val):
     x_val = float(np.squeeze(x_val))
-    return model_competitor.predict(poly.transform([[x_val]]))[0]
+    return model_competitor.predict(poly_transform(x_val))[0]
 
 # Find intersection point
 x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
@@ -39,9 +44,10 @@ x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
 area, _ = quad(lambda x_val: abs(f(x_val) - g(x_val)), x_intersect, 50)
 
 # Predict over a range for plotting
-x_range = np.linspace(x.min(), 50, 300).reshape(-1, 1)
-y_pred_angleon = model_angleon.predict(poly.transform(x_range))
-y_pred_competitor = model_competitor.predict(poly.transform(x_range))
+x_range = np.linspace(1, 55, 300).reshape(-1, 1)
+log_x_range = np.log(x_range)
+y_pred_angleon = model_angleon.predict(poly.transform(log_x_range))
+y_pred_competitor = model_competitor.predict(poly.transform(log_x_range))
 
 # Streamlit layout
 st.set_page_config(page_title="Durability vs Belt Speed", layout="wide")
@@ -86,7 +92,8 @@ fig.update_layout(
     hovermode='x',
     legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
     xaxis=dict(
-        type='log',
+        type='linear',
+        range=[0, 55],
         showspikes=True, spikemode="across", spikesnap="cursor",
         showline=True, spikecolor="lightgray", spikethickness=1
     ),
