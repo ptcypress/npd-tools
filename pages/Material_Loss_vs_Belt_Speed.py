@@ -4,16 +4,15 @@ import numpy as np
 import plotly.graph_objects as go
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
-from scipy.optimize import fsolve
 
 # Load durability data
 csv_path = "data/durability_data.csv"
 df = pd.read_csv(csv_path)
 
 # Ensure proper column names are used
-df = df.dropna(subset=['Belt Speed', 'Rate of Material Loss'])
+df.columns = df.columns.str.strip()
 x = df['Belt Speed'].values.reshape(-1, 1)
-y = df['Rate of Material Loss'].values
+y = df['AngleOn'].values  # Change to 'Competitor' to compare other material
 
 # Polynomial regression (cubic)
 poly = PolynomialFeatures(degree=3)
@@ -36,7 +35,7 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(
     x=x_range.flatten(), y=y_pred,
     mode='lines',
-    name='Cubic Fit',
+    name='Cubic Fit (AngleOn)',
     line=dict(color='green', width=3)
 ))
 
