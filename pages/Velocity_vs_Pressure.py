@@ -14,7 +14,7 @@ st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure")
 
 # --- Load Data ---
-csv_path = "/mnt/data/velocity_data.csv"
+csv_path = "data/velocity_data.csv"
 df = pd.read_csv(csv_path)
 
 # --- Filter relevant data ---
