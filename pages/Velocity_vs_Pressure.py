@@ -30,7 +30,7 @@ st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Velocity vs Pressure — Cubic Polynomial Fit")
 
 # Define target brushes (case-insensitive)
-target_brushes = ["angleon", "competitor"]
+target_brushes = ["AngleOn™", "Competitor"]
 colors = qualitative.Plotly
 fig = go.Figure()
 
