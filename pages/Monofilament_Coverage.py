@@ -9,8 +9,7 @@ st.title("Monofilament Coverage: Percent Area vs EPI² & Filament Diameter")
 
 st.write("""
 Use the sliders in the sidebar to explore how different EPI² values affect theoretical coverage
-over a range of filament diameters. A horizontal dashed line shows the hexagonal packing limit (~90.69%).
-""")
+over a range of filament diameters.""")
 
 # Sidebar controls
 st.sidebar.header("EPI² Values (ends per inch squared)")
@@ -46,13 +45,13 @@ for idx, (label, epi_val) in enumerate(epi_inputs.items()):
     ))
 
 # Theoretical max limit
-fig.add_trace(go.Scatter(
-    x=[diameters[0], diameters[-1]],
-    y=[90.69, 90.69],
-    mode='lines',
-    name='Hexagonal Packing Limit (~90.69%)',
-    line=dict(color='gray', width=3, dash='dash')
-))
+#fig.add_trace(go.Scatter(
+    #x=[diameters[0], diameters[-1]],
+    #y=[90.69, 90.69],
+    #mode='lines',
+    #name='Hexagonal Packing Limit (~90.69%)',
+    #line=dict(color='gray', width=3, dash='dash')
+#))
 
 # Reference vertical lines
 ref_diams = [0.0045, 0.006, 0.010, 0.016]
