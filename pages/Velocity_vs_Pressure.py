@@ -7,7 +7,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from plotly.colors import qualitative
 
 # Load data
-df = pd.read_csv("C:/Users/cjm/OneDrive - Roto Frank FTT GmbH/Desktop/velocity_data.csv")
+df = pd.read_csv("velocity_data.csv")
 
 # Ensure necessary columns
 required_cols = {"Brush", "Pressure (lbs/in²)", "Velocity (in/sec)"}
