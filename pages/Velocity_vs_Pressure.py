@@ -50,10 +50,10 @@ with warnings.catch_warnings():
             x_intersect = float(guess)
         else:
             x_intersect = 3.08  # fallback if out of range
-            st.warning("fsolve failed to find a valid intersection. Using fallback value x = 3.08.")
+            #st.warning("fsolve failed to find a valid intersection. Using fallback value x = 3.08.")
     except:
         x_intersect = 3.08
-        st.warning("fsolve failed. Using fallback value x = 3.08.")
+        #st.warning("fsolve failed. Using fallback value x = 3.08.")
 
 # --- Area Between Curves ---
 area = None
