@@ -47,8 +47,8 @@ angleon_fit = f(pressure_range)
 competitor_fit = g(pressure_range)
 
 # Streamlit layout
-st.set_page_config(page_title="Regression Comparison", layout="wide")
-st.title("Regression Comparison: AngleOn™ vs Competitor")
+st.set_page_config(page_title="Cubic Regression Comparison", layout="wide")
+st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
 
 # Plot
@@ -95,6 +95,15 @@ fig.add_annotation(
     font=dict(size=14)
 )
 
+fig.add_annotation(
+    xref="paper", yref="paper",
+    x=0.01, y=1.05,
+    text="The shaded area shows AngleOn™'s cumulative velocity advantage across the pressure range where it outperforms the competitor.\nThis means faster, more consistent material movement — a performance edge that scales with operating pressure.",
+    showarrow=False,
+    align="left",
+    font=dict(size=12, color="gray")
+)
+
 # Add crosshairs and live cursor
 fig.update_layout(
     xaxis_title="Pressure (lbs/in²)",
@@ -110,7 +119,7 @@ fig.update_layout(
         showspikes=True, spikemode="across", spikesnap="cursor",
         showline=True, spikecolor="lightgray", spikethickness=1
     ),
-    hoverlabel=dict(bgcolor="rgba(0,0,0,0)", font_size=12, font_family="Arial")
+    hoverlabel=dict(bgcolor="rgba(255,255,255,0.1)", font_size=12, font_family="Arial")
 )
 
 st.plotly_chart(fig, use_container_width=True)
