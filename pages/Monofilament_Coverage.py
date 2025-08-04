@@ -15,10 +15,10 @@ over a range of filament diameters. A horizontal dashed line shows the hexagonal
 # Sidebar controls
 st.sidebar.header("EPI² Values (ends per inch squared)")
 epi_inputs = {
-    "Brushlon": st.sidebar.slider("Brushlon", min_value=1_000, max_value=15_000, value=9_000, step=10),
+    "Brushlon": st.sidebar.slider("Competitor", min_value=1_000, max_value=15_000, value=9_750, step=10),
     "AngleOn™": st.sidebar.slider("AngleOn™", min_value=1_000, max_value=15_000, value=6_910, step=10),
-    "XT10": st.sidebar.slider("XT10", min_value=1_000, max_value=15_000, value=11_700, step=10),
-    "XT16": st.sidebar.slider("XT16", min_value=1_000, max_value=15_000, value=8_700, step=10),
+    "XT10": st.sidebar.slider("XT10", min_value=1_000, max_value=15_000, value=2_275, step=10),
+    "XT16": st.sidebar.slider("XT16", min_value=1_000, max_value=15_000, value=1_135, step=10),
 }
 
 diameter_min, diameter_max = st.sidebar.slider("Diameter Range (inches)", 0.002, 0.022, (0.002, 0.022), step=0.0005)
