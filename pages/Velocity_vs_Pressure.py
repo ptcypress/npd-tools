@@ -26,8 +26,8 @@ brushes = ["AngleOn™", "Competitor"]
 
 for i, brush in enumerate(brushes):
     subset = df[df["Brush"] == brush]
-    x = subset["Pressure"].values
-    y = subset["Velocity"].values
+    x = subset["Pressure (lbs/in²)"].values
+    y = subset["Velocity (in/sec)"].values
 
     # Fit cubic polynomial
     poly = PolynomialFeatures(degree=3)
