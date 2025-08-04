@@ -1,4 +1,4 @@
-﻿Brush,Weight (lbs),Time (sec),Velocity (in/sec),Pressure (lbs/in²)
+﻿Brush,Weight,Time,Velocity,Pressure
 AngleOn™,0.167,6.64,4.56,0.05
 AngleOn™,0.167,6.64,4.56,0.05
 AngleOn™,0.167,6.65,4.55,0.05
@@ -244,3 +244,4 @@ XT16,26.25,69.74,0.44,3.50
 XT16,26.25,69.14,0.44,3.50
 XT16,26.25,69.38,0.44,3.50
 XT16,26.25,69.33,0.44,3.50
+
