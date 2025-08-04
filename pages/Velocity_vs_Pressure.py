@@ -80,18 +80,24 @@ competitor_fit = [g(x) for x in x_range]
 # --- Plotly Visualization ---
 fig = go.Figure()
 
-# Shaded Area Between Curves
+# Shaded Area Between Curves (0 to x_intersect only)
 if valid_intersection:
-    fill_x = np.concatenate([x_range[x_range <= x_intersect], x_range[x_range <= x_intersect][::-1]])
-    fill_y = np.concatenate([[f(x) for x in fill_x[:len(fill_x)//2]],
-                             [g(x) for x in fill_x[len(fill_x)//2:][::-1]]])
+    # Subset of x_range only up to intersection
+    x_fill = x_range[x_range <= x_intersect]
+    y1_fill = [f(x) for x in x_fill]
+    y2_fill = [g(x) for x in x_fill]
+
+    fill_x = np.concatenate([x_fill, x_fill[::-1]])
+    fill_y = np.concatenate([y1_fill, y2_fill[::-1]])
+
     fig.add_trace(go.Scatter(
-        x=fill_x, y=fill_y,
+        x=fill_x,
+        y=fill_y,
         fill='toself',
         fillcolor='rgba(150,150,150,0.3)',
         line=dict(color='rgba(255,255,255,0)'),
         hoverinfo='skip',
-        name='Performance Advantage Area'
+        name='Advantage Area (0 to Intersection)'
     ))
 
 # Fitted Curves Only (No raw data)
