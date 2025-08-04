@@ -111,14 +111,15 @@ fig.update_layout(
     ),
     yaxis=dict(
         range=[0, y_max_buffered],
+        dtick=0.0005,  # 👈 finer resolution
+        tickformat=".4f",
         showspikes=True,
         spikemode="across",
         spikesnap="cursor",
         showline=True,
         spikecolor="lightgray",
         spikethickness=0.7,
-        spikedash="dot",
-        tickformat=".4f"
+        spikedash="dot"
     ),
     hoverlabel=dict(
         bgcolor="rgba(0,0,0,0)",
