@@ -10,24 +10,24 @@ from plotly.colors import qualitative
 df = pd.read_csv("velocity_data.csv")
 
 # Ensure necessary columns
-required_cols = {"Brush", "Pressure (lbs/in²)", "Velocity (in/sec)"}
+required_cols = {"Brush", "Pressure", "Velocity"}
 if not required_cols.issubset(df.columns):
-    st.error("CSV must contain columns: Brush, Pressure (lbs/in²), Velocity (in/sec)")
+    st.error("CSV must contain columns: Brush, Pressure, Velocity")
     st.stop()
 
 # Streamlit setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
-st.title("Velocity vs Pressure")
+st.title("Velocity vs Pressure — Cubic Polynomial Fit")
 
 # Plot setup
 fig = go.Figure()
 colors = qualitative.Plotly
-brushes = ["AngleOn™", "Competitor"]
+brushes = ["AngleOn", "Competitor"]
 
 for i, brush in enumerate(brushes):
     subset = df[df["Brush"] == brush]
-    x = subset["Pressure (lbs/in²)"].values
-    y = subset["Velocity (in/sec)"].values
+    x = subset["Pressure"].values
+    y = subset["Velocity"].values
 
     # Fit cubic polynomial
     poly = PolynomialFeatures(degree=3)
