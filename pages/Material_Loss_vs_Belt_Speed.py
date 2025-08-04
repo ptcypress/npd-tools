@@ -131,7 +131,7 @@ fig.update_layout(
 fig.add_annotation(
     x=15,
     y=y_max_buffered * 0.25,
-    text=f"Shaded area = {area:.6f} (in·min⁻¹·in·sec⁻¹)",
+    text=f"Cumulative performance gap = {area:.6e} in²/min·sec",
     showarrow=False,
     font=dict(size=13)
 )
