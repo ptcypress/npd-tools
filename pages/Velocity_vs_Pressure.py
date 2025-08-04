@@ -14,33 +14,20 @@ st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure")
 
 # --- Load Data ---
-csv_path = "data/velocity_data.csv"
-try:
-    df = pd.read_csv(csv_path)
-except FileNotFoundError:
-    st.error(f"CSV file not found at path: {csv_path}")
-    st.stop()
+csv_path = "/mnt/data/velocity_data.csv"
+df = pd.read_csv(csv_path)
 
-required_cols = {'Brush', 'Pressure', 'Velocity'}
-if not required_cols.issubset(df.columns):
-    st.error(f"CSV is missing required columns: {required_cols}")
-    st.dataframe(df)
-    st.stop()
+# --- Filter relevant data ---
+df = df[df['Brush'].isin(['AngleOn™', 'Competitor'])]
 
-# --- Filter Data (case insensitive, flexible) ---
-angleon = df[df['Brush'].str.contains('angleon', case=False, na=False)]
-competitor = df[df['Brush'].str.contains('competitor', case=False, na=False)]
+angleon = df[df['Brush'] == 'AngleOn™']
+competitor = df[df['Brush'] == 'Competitor']
 
-if angleon.empty or competitor.empty:
-    st.error("AngleOn™ or Competitor data is missing or misnamed in the CSV.")
-    st.dataframe(df)
-    st.stop()
+x_angleon = angleon['Pressure (lbs/in²)'].values.reshape(-1, 1)
+y_angleon = angleon['Velocity (in/sec)'].values
 
-x_angleon = angleon['Pressure'].values.reshape(-1, 1)
-y_angleon = angleon['Velocity'].values
-
-x_comp = competitor['Pressure'].values.reshape(-1, 1)
-y_comp = competitor['Velocity'].values
+x_comp = competitor['Pressure (lbs/in²)'].values.reshape(-1, 1)
+y_comp = competitor['Velocity (in/sec)'].values
 
 # --- Polynomial Fit ---
 poly = PolynomialFeatures(degree=3)
@@ -60,9 +47,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     try:
         x_intersect = fsolve(diff, x0=1.0)[0]
-        if not (0 <= x_intersect <= max(df['Pressure'])):
-            raise ValueError("Intersection out of range.")
-        valid_intersection = True
+        valid_intersection = True if 0 <= x_intersect <= df['Pressure (lbs/in²)'].max() else False
     except:
         x_intersect = None
         valid_intersection = False
@@ -74,29 +59,28 @@ else:
     area = None
 
 # --- Build Plot ---
-x_range = np.linspace(0, max(df['Pressure']) + 0.5, 300)
+x_range = np.linspace(0, df['Pressure (lbs/in²)'].max() + 0.5, 300)
 angleon_fit = [f(x) for x in x_range]
 competitor_fit = [g(x) for x in x_range]
 
 fig = go.Figure()
 
-# --- Shaded Area Between Curves from x=0 to x_intersect ---
+# --- Shaded Area Between Curves ---
 if valid_intersection:
     x_fill = np.linspace(0, x_intersect, 300)
-    y1 = np.array([f(x) for x in x_fill])  # AngleOn
-    y2 = np.array([g(x) for x in x_fill])  # Competitor
+    y1 = np.array([f(x) for x in x_fill])
+    y2 = np.array([g(x) for x in x_fill])
 
-    # Combine to form a closed polygon
     fill_x = np.concatenate([x_fill, x_fill[::-1]])
     fill_y = np.concatenate([y1, y2[::-1]])
 
     fig.add_trace(go.Scatter(
         x=fill_x,
         y=fill_y,
-        mode='lines',  # must be lines for fill to show
+        mode='lines',
         line=dict(width=0),
         fill='toself',
-        fillcolor='rgba(0,0,0,0)',
+        fillcolor='rgba(150,150,150,0.3)',
         name='Advantage Area (0 to Intersection)'
     ))
 
