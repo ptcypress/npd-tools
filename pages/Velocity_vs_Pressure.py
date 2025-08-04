@@ -16,9 +16,9 @@ angleon = df[df["Brush"] == "AngleOn™"]
 competitor = df[df["Brush"] == "Competitor"]
 
 x1 = angleon["Pressure"].values
-y1 = angleon["Velocity (in/sec)"].values
+y1 = angleon["Velocity"].values
 x2 = competitor["Pressure"].values
-y2 = competitor["Velocity (in/sec)"].values
+y2 = competitor["Velocity"].values
 
 # Fit cubic polynomial models
 poly = PolynomialFeatures(degree=3)
