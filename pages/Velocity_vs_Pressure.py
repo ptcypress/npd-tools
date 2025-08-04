@@ -25,10 +25,12 @@ model_competitor = LinearRegression().fit(X_poly, y_competitor)
 
 # Define functions for integration
 def f(x_val):
-    return model_angleon.predict(poly.transform(np.array([[x_val]])))[0]
+    x_val = float(np.squeeze(x_val))
+    return model_angleon.predict(poly.transform([[x_val]]))[0]
 
 def g(x_val):
-    return model_competitor.predict(poly.transform(np.array([[x_val]])))[0]
+    x_val = float(np.squeeze(x_val))
+    return model_competitor.predict(poly.transform([[x_val]]))[0]
 
 # Find intersection point
 x_intersect = fsolve(lambda x_val: f(x_val) - g(x_val), x0=1.0)[0]
