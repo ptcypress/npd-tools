@@ -14,7 +14,7 @@ over a range of filament diameters.""")
 # Sidebar controls
 st.sidebar.header("EPI² Values (ends per inch squared)")
 epi_inputs = {
-    "Brushlon": st.sidebar.slider("Competitor", min_value=1_000, max_value=15_000, value=9_750, step=10),
+    "Competitor": st.sidebar.slider("Competitor", min_value=1_000, max_value=15_000, value=9_750, step=10),
     "AngleOn™": st.sidebar.slider("AngleOn™", min_value=1_000, max_value=15_000, value=6_910, step=10),
     "XT10": st.sidebar.slider("XT10", min_value=1_000, max_value=15_000, value=2_275, step=10),
     "XT16": st.sidebar.slider("XT16", min_value=1_000, max_value=15_000, value=1_135, step=10),
