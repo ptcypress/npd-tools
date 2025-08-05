@@ -34,7 +34,8 @@ else:
             x=x_angleon, y=y_loss,
             mode='lines+markers',
             name='AngleOn™',
-            line=dict(color='blue', width=3)
+            line=dict(color='blue', width=3),
+            hovertemplate='Hour: %{x: .2f}<br>Loss: %{y: .2f}%'
         ))
 
         fig.add_trace(go.Scatter(
