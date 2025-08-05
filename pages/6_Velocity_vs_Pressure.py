@@ -6,140 +6,136 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from scipy.integrate import quad
 from scipy.optimize import fsolve
-import warnings
+import os
 
-# --- Page Setup ---
+# Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
-st.title("Regression Comparison: AngleOn™ vs Competitor")
+st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
+st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
 
-st.write("""This plot shows cubic regression fit of average veloctiy as a function of pressure
-for both AngleOn™ and competitor product. The shaded area represents the cumulative velocity 
-advantage AngleOn™ has over competitor product.""")
+# Load data
+csv_path = "data/6_Velocity_vs_Pressure.csv"
+if not os.path.exists(csv_path):
+    st.error(f"File not found: {csv_path}")
+else:
+    df = pd.read_csv(csv_path)
+    df.columns = df.columns.str.strip()
 
-st.subheader("Velocity vs Pressure")
+    # Ensure correct columns exist
+    if 'Brush' not in df.columns or 'Pressure' not in df.columns or 'Velocity' not in df.columns:
+        st.error("Missing required columns in the CSV.")
+    else:
+        # Filter data
+        angleon = df[df['Brush'] == 'AngleOn™']
+        competitor = df[df['Brush'] == 'Competitor']
 
-# --- Load and prepare data ---
-csv_path = "data/velocity_data.csv"
-df = pd.read_csv(csv_path)
-df.columns = df.columns.str.strip()
+        x_angleon = angleon['Pressure'].values.reshape(-1, 1)
+        y_angleon = angleon['Velocity'].values
 
-# Detect column names dynamically
-pressure_col = [col for col in df.columns if "Pressure" in col][0]
-velocity_col = [col for col in df.columns if "Velocity" in col][0]
+        x_comp = competitor['Pressure'].values.reshape(-1, 1)
+        y_comp = competitor['Velocity'].values
 
-df = df[df['Brush'].isin(['AngleOn™', 'Competitor'])]
-angleon = df[df['Brush'] == 'AngleOn™']
-competitor = df[df['Brush'] == 'Competitor']
+        # Fit cubic models
+        poly = PolynomialFeatures(degree=3)
+        X_angleon_poly = poly.fit_transform(x_angleon)
+        X_comp_poly = poly.fit_transform(x_comp)
 
-x_angleon = angleon[pressure_col].values.reshape(-1, 1)
-y_angleon = angleon[velocity_col].values
-x_comp = competitor[pressure_col].values.reshape(-1, 1)
-y_comp = competitor[velocity_col].values
+        model1 = LinearRegression().fit(X_angleon_poly, y_angleon)
+        model2 = LinearRegression().fit(X_comp_poly, y_comp)
 
-# --- Polynomial Regression (Cubic) ---
-poly = PolynomialFeatures(degree=3)
-model1 = LinearRegression().fit(poly.fit_transform(x_angleon), y_angleon)
-model2 = LinearRegression().fit(poly.fit_transform(x_comp), y_comp)
+        def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
+        def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
+        def diff(x): return f(x) - g(x)
 
-def f(x): return model1.predict(poly.transform(np.array([[x]])))[0]
-def g(x): return model2.predict(poly.transform(np.array([[x]])))[0]
-def diff(x): return f(x) - g(x)
+        # Solve for intersection
+        try:
+            x_intersect = fsolve(diff, x0=1.0)[0]
+        except:
+            x_intersect = 3.08  # fallback
 
-# --- Attempt to solve for intersection with fallback ---
-x_intersect = None
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    try:
-        guess = fsolve(diff, x0=1.0)[0]
-        if 0 <= guess <= df[pressure_col].max():
-            x_intersect = float(guess)
-        else:
-            x_intersect = 3.08  # fallback if out of range
-            #st.warning("fsolve failed to find a valid intersection. Using fallback value x = 3.08.")
-    except:
-        x_intersect = 3.08
-        #st.warning("fsolve failed. Using fallback value x = 3.08.")
+        # Calculate area between curves (advantage area)
+        area_diff, _ = quad(diff, 0, x_intersect)
+        area_comp, _ = quad(g, 0, x_intersect)
+        percent_improvement = (area_diff / area_comp) * 100 if area_comp != 0 else 0
 
-# --- Area Between Curves ---
-area = None
-if x_intersect is not None:
-    area, _ = quad(diff, 0, x_intersect)
+        # Generate smooth range
+        pressure_range = np.linspace(0, x_intersect + 0.5, 300)
+        angleon_fit = [f(x) for x in pressure_range]
+        competitor_fit = [g(x) for x in pressure_range]
 
-# --- Generate range for regression lines ---
-x_range = np.linspace(0, df[pressure_col].max() + 0.5, 300).reshape(-1, 1)
-y_angleon = model1.predict(poly.transform(x_range))
-y_comp = model2.predict(poly.transform(x_range))
+        # Shaded area
+        x_fill = np.concatenate([pressure_range, pressure_range[::-1]])
+        y_fill = np.concatenate([angleon_fit, competitor_fit[::-1]])
 
-# --- Shading range ---
-x_fill = np.linspace(0, x_intersect, 300).reshape(-1, 1)
-y1 = model1.predict(poly.transform(x_fill))
-y2 = model2.predict(poly.transform(x_fill))
+        # Plot
+        fig = go.Figure()
 
-# --- Build plot ---
-fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=x_fill,
+            y=y_fill,
+            fill='toself',
+            fillcolor='rgba(150,150,150,0.3)',
+            line=dict(color='rgba(255,255,255,0)'),
+            hoverinfo='skip',
+            name='Performance Advantage Area'
+        ))
 
-# --- Shaded Area ---
-fig.add_trace(go.Scatter(
-    x=np.concatenate([x_fill.flatten(), x_fill.flatten()[::-1]]),
-    y=np.concatenate([y1, y2[::-1]]),
-    fill='toself',
-    mode='lines',
-    line=dict(width=0),
-    fillcolor='rgba(150,150,150,0.3)',
-    name='Advantage Area'
-))
+        fig.add_trace(go.Scatter(
+            x=pressure_range, y=angleon_fit,
+            mode='lines',
+            name='AngleOn™ Cubic Fit',
+            line=dict(color='blue', width=3),
+            hovertemplate='Pressure: %{x:.2f} psi<br>Velocity: %{y:.2f} in/sec'
+        ))
 
-# --- Regression Lines ---
-fig.add_trace(go.Scatter(x=x_range.flatten(), y=y_angleon, mode='lines',
-                         name='AngleOn™ Cubic Fit', line=dict(color='blue', width=3)))
-fig.add_trace(go.Scatter(x=x_range.flatten(), y=y_comp, mode='lines',
-                         name='Competitor Cubic Fit', line=dict(color='red', width=3)))
+        fig.add_trace(go.Scatter(
+            x=pressure_range, y=competitor_fit,
+            mode='lines',
+            name='Competitor Cubic Fit',
+            line=dict(color='red', width=3),
+            hovertemplate='Pressure: %{x:.2f} psi<br>Velocity: %{y:.2f} in/sec'
+        ))
 
-# --- Annotations ---
-fig.add_annotation(
-    x=x_intersect,
-    y=g(x_intersect),
-    text=f"Intersection @ {x_intersect:.2f} psi",
-    showarrow=True, arrowhead=3, ax=40, ay=-40
-)
-fig.add_annotation(
-    x=x_intersect / 2,
-    y=(np.max(y1) + np.max(y2)) / 2,
-    text=f"Advantage Area = {area:.3f} in/sec·psi",
-    showarrow=False,
-    font=dict(size=14)
-)
+        # Annotate
+        fig.add_annotation(
+            x=pressure_range[len(pressure_range)//2],
+            y=(max(angleon_fit) + max(competitor_fit)) / 2,
+            text=f"Advantage Area = {area_diff:.3f} in/sec·psi<br>Relative Advantage = {percent_improvement:.1f}%",
+            showarrow=False,
+            font=dict(size=13)
+        )
 
-# --- Layout ---
-fig.update_layout(
-    xaxis_title="Pressure (lbs/in²)",
-    yaxis_title="Velocity (in/sec)",
-    hovermode='x',
-    height=650,
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
-    xaxis=dict(
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-        spikecolor="lightgray",
-        spikethickness=0.7,
-        spikedash="dot"
-    ),
-    yaxis=dict(
-        showspikes=True,
-        spikemode="across",
-        spikesnap="cursor",
-        spikecolor="lightgray",
-        spikethickness=0.7,
-        spikedash="dot",
-        range=[0, None]  # 👈 Ensures no negative y values
-    ),
-    hoverlabel=dict(
-        bgcolor="rgba(0,0,0,0)",
-        font_size=12,
-        font_family="Arial"
-    )
-)
+        fig.update_layout(
+            xaxis_title="Pressure (psi)",
+            yaxis_title="Velocity (in/sec)",
+            height=650,
+            hovermode='x',
+            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.75),
+            xaxis=dict(
+                showspikes=True,
+                spikemode="across",
+                spikesnap="cursor",
+                showline=True,
+                spikecolor="lightgray",
+                spikethickness=0.7,
+                spikedash="dot"
+            ),
+            yaxis=dict(
+                showspikes=True,
+                spikemode="across",
+                spikesnap="cursor",
+                showline=True,
+                spikecolor="lightgray",
+                spikethickness=0.7,
+                spikedash="dot",
+                range=[0, max(max(angleon_fit), max(competitor_fit)) + 0.5]
+            ),
+            hoverlabel=dict(
+                bgcolor="rgba(0,0,0,0)",
+                font_size=12,
+                font_family="Arial"
+            )
+        )
 
-# --- Render ---
-st.plotly_chart(fig, use_container_width=True)
+        st.markdown("This chart compares the velocity output of two brushes over a range of pressures. The shaded area quantifies total performance advantage of AngleOn™ over the competitor.")
+        st.plotly_chart(fig, use_container_width=True)
