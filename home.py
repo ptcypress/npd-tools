@@ -6,7 +6,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🧰 New Product Development Toolbox - AngleOn™ & AngleOn XT")
+st.title("🧰 New Product Development - AngleOn™ & AngleOn XT")
 st.markdown("---")
 
 st.markdown("""
@@ -29,5 +29,6 @@ Use the sidebar on the left to navigate between apps:
 
 ---
 """)
+
 
 
