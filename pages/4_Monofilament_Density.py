@@ -4,15 +4,14 @@ import streamlit as st
 
 @st.cache_resource
 def generate_monofilament_data(density, diameter, pattern="hex"):
-    # Compute filament cross-sectional area and total area
     area_each = np.pi * (diameter / 2) ** 2
     total_area = density * area_each
-    percent_coverage = (total_area / 1.0) * 100
+    percent_coverage = total_area * 100
 
     positions = []
 
     if pattern == "hex":
-        n_total = density * 1.0
+        n_total = density
         n_rows = int(np.sqrt(n_total / (np.sqrt(3) / 2)))
         row_spacing = 1.0 / n_rows
         col_spacing = row_spacing * np.sqrt(3) / 2
@@ -39,9 +38,12 @@ def generate_monofilament_data(density, diameter, pattern="hex"):
 
     return np.array(positions), total_area, percent_coverage
 
-def draw_monofilament(ax, positions, diameter, title, density, total_area, percent_coverage):
+def draw_monofilament(positions, diameter, title, density, total_area, percent_coverage):
+    fig, ax = plt.subplots(figsize=(6, 6), dpi=150)
+
     if len(positions) > 0:
-        ax.scatter(positions[:, 0], positions[:, 1], s=(diameter * 72)**2, edgecolor='black', facecolor='gray', linewidth=0.2)
+        ax.scatter(positions[:, 0], positions[:, 1], 
+                   s=(diameter * 72)**2, edgecolor='black', facecolors='gray', linewidth=0.2)
 
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], 'k-', lw=1)
     ax.set_aspect('equal')
@@ -49,25 +51,23 @@ def draw_monofilament(ax, positions, diameter, title, density, total_area, perce
     ax.set_ylim(0, 1)
     ax.set_xticks([0, 0.5, 1])
     ax.set_yticks([0, 0.5, 1])
+    ax.set_xlabel("inches")
     ax.set_ylabel("inches")
     ax.set_title(f"{title}\n{density} ends/in², {diameter}\" dia")
     ax.text(0.5, -0.12, f"Monofilament area = {total_area:.4f} in²\nCoverage = {percent_coverage:.1f}%", 
             transform=ax.transAxes, ha='center', fontsize=9)
+    plt.tight_layout()
+    return fig
 
-# Setup plot
-fig, axs = plt.subplots(1, 4, figsize=(20, 5), dpi=120)
+# Streamlit UI
+st.set_page_config(page_title="Monofilament Pattern Viewer", layout="centered")
+st.title("Monofilament Pattern Visualizer")
 
-# Data for each brush type
-configs = [
-    ("AngleOn™", 6912, 0.006, "hex"),
-    ("XT10", 2273, 0.010, "grid"),
-    ("XT16", 1136, 0.016, "grid"),
-    ("Competitor", 9754, 0.0045, "hex"),
-]
+# Inputs
+pattern = st.selectbox("Pattern Type", ["hex", "grid"])
+density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=100)
+diameter = st.slider("Filament Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
 
-for ax, (title, density, diameter, pattern) in zip(axs, configs):
-    positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
-    draw_monofilament(ax, positions, diameter, title, density, total_area, percent_coverage)
-
-plt.tight_layout()
+positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
+fig = draw_monofilament(positions, diameter, "Custom Pattern", density, total_area, percent_coverage)
 st.pyplot(fig)
