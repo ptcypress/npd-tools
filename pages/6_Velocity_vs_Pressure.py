@@ -100,7 +100,7 @@ else:
         fig.add_annotation(
             x=pressure_range[len(pressure_range)//2],
             y=(max(angleon_fit) + max(competitor_fit)) / 2,
-            #text=f"Advantage Area = {area_diff:.3f} in/sec·psi<br>Relative Advantage = {percent_improvement:.1f}%",
+            text=f"Advantage Area = {area_diff:.3f} in/sec·psi<br>Relative Advantage = {percent_improvement:.1f}%",
             showarrow=False,
             font=dict(size=13)
         )
