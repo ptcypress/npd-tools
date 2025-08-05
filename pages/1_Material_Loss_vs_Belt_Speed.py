@@ -48,6 +48,17 @@ st.set_page_config(page_title="Durability vs Belt Speed", layout="wide")
 st.title("Durability Characterization")
 st.subheader("Rate of Material Loss vs Belt Speed")
 
+# Explanatory text
+st.markdown("""
+This chart compares the **rate of material loss** across belt speeds for two materials.
+The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
+Lower material loss indicates superior wear resistance under accelerated wear conditions.
+""")
+
+st.markdown("""
+Accelerated wear test designed to mimic real-use testing applied forces. Modified belt sander fixture (220-grit) was used.
+""")
+
 # Plot
 fig = go.Figure()
 
@@ -119,13 +130,3 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-# Explanatory text
-st.markdown("""
-This chart compares the **rate of material loss** across belt speeds for two materials.
-The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
-Lower material loss indicates superior wear resistance under accelerated wear conditions.
-""")
-
-st.markdown("""
-Accelerated wear test designed to mimic real-use testing applied forces. Modified belt sander fixture (220-grit) was used.
-""")
