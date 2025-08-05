@@ -70,8 +70,8 @@ fig.add_trace(go.Scatter(
 fig.add_annotation(
     x=15,
     y=y_max * 0.25,
-    text=(f"Cumulative performance gap = {area:.6e} in²/min·sec<br>"
-          f"Relative improvement = {percent_improvement:.2f}%"),
+    text=(f"Advantage Area = {area:.6e} in²/min·sec<br>"
+          f"Relative Advantage = {percent_improvement:.2f}%"),
     showarrow=False,
     font=dict(size=13)
 )
