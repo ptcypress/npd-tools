@@ -11,7 +11,7 @@ st.title("Material Loss Over Time")
 st.subheader("Cumulative Material Loss (%) vs Runtime (Hours)")
 
 # File path
-csv_path = "data/runtime_data.csv"
+csv_path = "data/product_durability.csv"
 
 # Load data
 if not os.path.exists(csv_path):
