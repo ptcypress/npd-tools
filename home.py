@@ -10,18 +10,18 @@ st.title("🧰 New Product Development - AngleOn™ & AngleOn XT")
 st.markdown("---")
 
 st.markdown("""
-This is a collection of interactive engineering analyses specific to brush development.  
+This is a collection of interactive engineering analyses specific to angle brush development.  
 Use the sidebar on the left to navigate between apps:
 
 -  **Product Durability:**
-    -  1 Material Loss vs Belt Speed
-    -  2 Product Durability
+    -  Material Loss vs Belt Speed (Accelerated Wear Testing)
+    -  Product Durability (Calculated Material Life Expectancy)
 -  **Product Physical Characteristics:**
-    -  3 Monofilament Coverage
-    -  4 Monofilament Density
+    -  Monofilament Coverage (Comparison of Coverage Area Across Different Brush Types)
+    -  Monofilament Density (Area Covered by Monofilament per Square Inch of Brush)
 -  **Product Functional Characteristics:**  
-    -  5 Velocity Boxplot
-    -  6 Velocity vs Pressure
+    -  Velocity Boxplot
+    -  Velocity vs Pressure
 
     
 ---
@@ -33,6 +33,7 @@ Use the sidebar on the left to navigate between apps:
 
 ---
 """)
+
 
 
 
