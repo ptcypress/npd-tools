@@ -25,7 +25,7 @@ else:
     else:
         x_angleon = df["AngleOn™ Run Time (hrs)"]
         x_comp = df["Competitor Product Run Time (hrs)"]
-        y_loss = df["Mat'l Loss (in)"]
+        y_loss = df["Mat'l Loss (%)"]
 
         # Plot
         fig = go.Figure()
