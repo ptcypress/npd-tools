@@ -41,7 +41,8 @@ else:
             x=x_comp, y=y_loss,
             mode='lines+markers',
             name='Competitor',
-            line=dict(color='red', width=3)
+            line=dict(color='red', width=3),
+            hovertemplate='Hour: %{x: .2f}<br>Loss: %{y: .2f}%'
         ))
 
         fig.update_layout(
