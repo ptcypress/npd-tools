@@ -105,7 +105,7 @@ fig.add_annotation(
 fig.add_annotation(
     x=x_intersect / 2,
     y=(np.max(y1) + np.max(y2)) / 2,
-    text=f"Shaded Area = {area:.3f} in/sec·psi",
+    text=f"Advantage Area = {area:.3f} in/sec·psi",
     showarrow=False,
     font=dict(size=14)
 )
