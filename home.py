@@ -14,7 +14,7 @@ This is a collection of interactive engineering analyses specific to angle brush
 Use the sidebar on the left to navigate between apps:
 
 -  **Product Durability:**
-    -  Material Loss vs Belt Speed (Accelerated Wear Testing)
+    -  Accelerated Wear Testing
     -  Product Durability (Calculated Material Life Expectancy)
 -  **Product Physical Characteristics:**
     -  Monofilament Coverage (Comparison of Coverage Area Across Different Brush Types)
@@ -33,6 +33,7 @@ Use the sidebar on the left to navigate between apps:
 
 ---
 """)
+
 
 
 
