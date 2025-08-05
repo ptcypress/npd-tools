@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import os
+
+st.write("File Exists:". os.path.exists(csv_path))
+st.write("Files in /data:", os.listdir("data"))
 
 # Load CSV from predefined path
 csv_path = "data/durability_data.csv"
