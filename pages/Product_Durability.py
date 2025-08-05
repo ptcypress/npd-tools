@@ -9,7 +9,7 @@ csv_path = "data/product_durability.csv"
 # Page setup
 st.set_page_config(page_title="Material Loss Over Time", layout="wide")
 st.title("Material Loss Over Time")
-st.subheader("Cumulative Material Loss (in) vs Runtime (Hours)")
+st.subheader("Cumulative Material Loss (%) vs Runtime (Hours)")
 
 # Check file existence
 if not os.path.exists(csv_path):
@@ -18,7 +18,7 @@ else:
     df = pd.read_csv(csv_path)
     df.columns = df.columns.str.strip()
 
-    required_cols = ["Mat'l Loss (in)", "AngleOn™ Run Time (hrs)", "Competitor Product Run Time (hrs)"]
+    required_cols = ["Mat'l Loss (%)", "AngleOn™ Run Time (hrs)", "Competitor Product Run Time (hrs)"]
     if not all(col in df.columns for col in required_cols):
         st.error("Required columns missing from CSV.")
         st.write("Available columns:", df.columns.tolist())
@@ -46,7 +46,7 @@ else:
 
         fig.update_layout(
             xaxis_title="Runtime (Hours)",
-            yaxis_title="Cumulative Material Loss (in)",
+            yaxis_title="Cumulative Material Loss (%)",
             height=650,
             hovermode='x',
             legend=dict(
@@ -73,7 +73,7 @@ else:
                 spikecolor="lightgray",
                 spikethickness=0.7,
                 spikedash="dot",
-                tickformat="e"
+                tickformat=".1f"
             ),
             hoverlabel=dict(
                 bgcolor="rgba(0,0,0,0)",
