@@ -14,7 +14,7 @@ st.title("Cubic Regression Comparison: AngleOn™ vs Competitor")
 st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
 
 # Load data
-csv_path = "data/6_Velocity_vs_Pressure.csv"
+csv_path = "data/velocity_data.csv"
 if not os.path.exists(csv_path):
     st.error(f"File not found: {csv_path}")
 else:
