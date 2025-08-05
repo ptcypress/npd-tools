@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import os
 
 # Path to local file
-csv_path = "data/durability_data.csv"
+csv_path = "data/product_durability.csv"
 
 # Optional: debug file presence
 if not os.path.exists(csv_path):
