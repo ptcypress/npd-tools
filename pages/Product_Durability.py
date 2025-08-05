@@ -1,48 +1,44 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.graph_objects as go
 import os
 
-# Path to local file
-csv_path = "data/product_durability.csv"
+# Local file path
+csv_path = "data/durability_data.csv"
 
-# Optional: debug file presence
+# Page setup
+st.set_page_config(page_title="Material Loss Over Time", layout="wide")
+st.title("Material Loss Over Time")
+st.subheader("Cumulative Material Loss (in) vs Runtime (Hours)")
+
+# Check file existence
 if not os.path.exists(csv_path):
     st.error(f"File not found: {csv_path}")
 else:
-    # Load and clean
     df = pd.read_csv(csv_path)
     df.columns = df.columns.str.strip()
 
-    # Verify expected columns are present
-    required_cols = ['Hours', 'AngleOn Run Time', 'Competitor Run Time']
+    required_cols = ["Mat'l Loss (in)", "AngleOn™ Run Time (hrs)", "Competitor Product Run Time (hrs)"]
     if not all(col in df.columns for col in required_cols):
-        st.error("Expected columns missing in the CSV.")
-        st.write("Found columns:", df.columns.tolist())
+        st.error("Required columns missing from CSV.")
+        st.write("Available columns:", df.columns.tolist())
     else:
-        # Extract data
-        x = df['Hours']
-        y_angleon = df['AngleOn Run Time']
-        y_competitor = df['Competitor Run Time']
-
-        # Page setup
-        st.set_page_config(page_title="Material Loss Over Time", layout="wide")
-        st.title("Material Loss Over Time")
-        st.subheader("Cumulative Material Loss (in/min) vs Runtime (Hours)")
+        x_angleon = df["AngleOn™ Run Time (hrs)"]
+        x_comp = df["Competitor Product Run Time (hrs)"]
+        y_loss = df["Mat'l Loss (in)"]
 
         # Plot
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
-            x=x, y=y_angleon,
+            x=x_angleon, y=y_loss,
             mode='lines+markers',
             name='AngleOn™',
             line=dict(color='blue', width=3)
         ))
 
         fig.add_trace(go.Scatter(
-            x=x, y=y_competitor,
+            x=x_comp, y=y_loss,
             mode='lines+markers',
             name='Competitor',
             line=dict(color='red', width=3)
@@ -50,7 +46,7 @@ else:
 
         fig.update_layout(
             xaxis_title="Runtime (Hours)",
-            yaxis_title="Cumulative Material Loss (in/min)",
+            yaxis_title="Cumulative Material Loss (in)",
             height=650,
             hovermode='x',
             legend=dict(
@@ -86,5 +82,5 @@ else:
             )
         )
 
-        st.markdown("This plot shows the accumulated material loss for both brushes over runtime. Lower values indicate superior durability.")
+        st.markdown("This chart shows the cumulative material loss of two brushes as a function of their runtime. Lower material loss implies greater durability.")
         st.plotly_chart(fig, use_container_width=True)
