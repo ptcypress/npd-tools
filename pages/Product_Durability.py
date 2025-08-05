@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import os
 
 # Local file path
-csv_path = "data/durability_data.csv"
+csv_path = "data/product_durability.csv"
 
 # Page setup
 st.set_page_config(page_title="Material Loss Over Time", layout="wide")
