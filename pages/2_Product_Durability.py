@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from scipy.interpolate import interp1d
+from scipy.integrate import simps
 import os
 
 # Streamlit page config
@@ -50,6 +51,11 @@ else:
         y_angleon_smooth = angleon_interp(x_smooth)
         y_comp_smooth = competitor_interp(x_smooth)
 
+        # Calculate advantage and percent improvement
+        area_diff = simps(y_comp_smooth - y_angleon_smooth, x_smooth)
+        baseline_area = simps(y_comp_smooth, x_smooth)
+        percent_improvement = (area_diff / baseline_area) * 100 if baseline_area > 0 else 0
+
         # Create shaded area coordinates
         x_fill = np.concatenate([x_smooth, x_smooth[::-1]])
         y_fill = np.concatenate([y_angleon_smooth, y_comp_smooth[::-1]])
@@ -84,6 +90,16 @@ else:
             line=dict(color='red', width=3),
             hovertemplate='Hour: %{x:.2f}<br>Loss: %{y:' + y_format + '}'
         ))
+
+        # Annotation
+        fig.add_annotation(
+            x=x_smooth[len(x_smooth)//3],
+            y=max(y_comp_smooth) * 0.7,
+            text=(f"Cumulative performance gap = {area_diff:.6f}<br>"
+                  f"Relative improvement = {percent_improvement:.2f}%"),
+            showarrow=False,
+            font=dict(size=13)
+        )
 
         # Layout and style
         fig.update_layout(
@@ -124,5 +140,6 @@ else:
             )
         )
 
+        # Text below chart
         st.markdown(f"This chart shows the cumulative **material loss** of two brushes in terms of **{unit_choice}**. Lower values indicate greater durability.")
         st.plotly_chart(fig, use_container_width=True)
