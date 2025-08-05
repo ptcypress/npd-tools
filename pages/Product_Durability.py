@@ -1,46 +1,54 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
-import os
-from scipy.interpolate import interp1d
 import numpy as np
+import plotly.graph_objects as go
+from scipy.interpolate import interp1d
+import os
 
-# Interpolation functions
-angleon_interp = interp1d(x_angleon, y_loss, kind='linear', fill_value='extrapolate')
-competitor_interp = interp1d(x_comp, y_loss, kind='linear', fill_value='extrapolate')
-
-# Smooth x range
-x_smooth = np.linspace(min(x_angleon.min(), x_comp.min()), max(x_angleon.max(), x_comp.max()), 500)
-
-# Smoothed y values
-y_angleon_smooth = angleon_interp(x_smooth)
-y_comp_smooth = competitor_interp(x_smooth
-
-# Local file path
-csv_path = "data/product_durability.csv"
-
-# Page setup
+# Streamlit page settings
 st.set_page_config(page_title="Material Loss Over Time", layout="wide")
 st.title("Material Loss Over Time")
 st.subheader("Cumulative Material Loss (%) vs Runtime (Hours)")
 
-# Check file existence
+# File path
+csv_path = "data/runtime_data.csv"
+
+# Load data
 if not os.path.exists(csv_path):
     st.error(f"File not found: {csv_path}")
 else:
     df = pd.read_csv(csv_path)
     df.columns = df.columns.str.strip()
 
-    required_cols = ["Mat'l Loss (%)", "AngleOn™ Run Time (hrs)", "Competitor Product Run Time (hrs)"]
+    required_cols = [
+        "Mat'l Loss (%)",
+        "AngleOn™ Run Time (hrs)",
+        "Competitor Product Run Time (hrs)"
+    ]
+
     if not all(col in df.columns for col in required_cols):
-        st.error("Required columns missing from CSV.")
+        st.error("Missing required columns.")
         st.write("Available columns:", df.columns.tolist())
     else:
+        # Extract columns
+        y_loss = df["Mat'l Loss (%)"]
         x_angleon = df["AngleOn™ Run Time (hrs)"]
         x_comp = df["Competitor Product Run Time (hrs)"]
-        y_loss = df["Mat'l Loss (%)"]
 
-        # Plot
+        # Interpolate for smooth curves
+        angleon_interp = interp1d(x_angleon, y_loss, kind='linear', fill_value='extrapolate')
+        competitor_interp = interp1d(x_comp, y_loss, kind='linear', fill_value='extrapolate')
+
+        x_smooth = np.linspace(
+            min(x_angleon.min(), x_comp.min()),
+            max(x_angleon.max(), x_comp.max()),
+            500
+        )
+
+        y_angleon_smooth = angleon_interp(x_smooth)
+        y_comp_smooth = competitor_interp(x_smooth)
+
+        # Plot setup
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
@@ -58,7 +66,6 @@ else:
             line=dict(color='red', width=3),
             hovertemplate='Hour: %{x:.2f}<br>Loss: %{y:.2f}%'
         ))
-
 
         fig.update_layout(
             xaxis_title="Runtime (Hours)",
@@ -98,5 +105,5 @@ else:
             )
         )
 
-        st.markdown("This chart shows the cumulative material loss of two brushes as a function of their runtime. Lower material loss implies greater durability.")
+        st.markdown("This chart shows the cumulative **percent material loss** over time for both brushes. Lower values indicate superior durability.")
         st.plotly_chart(fig, use_container_width=True)
