@@ -11,6 +11,11 @@ import warnings
 # --- Page Setup ---
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Regression Comparison: AngleOn™ vs Competitor")
+
+st.write("""This plot shows cubic regression fit of average veloctiy as a function of pressure
+for both AngleOn™ and competitor product. The shaded area represents the cumulative velocity 
+advantage AngleOn™ has over competitor product.""")
+
 st.subheader("Velocity vs Pressure")
 
 # --- Load and prepare data ---
