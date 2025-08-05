@@ -86,7 +86,7 @@ fig.add_trace(go.Scatter(
     mode='lines',
     line=dict(width=0),
     fillcolor='rgba(150,150,150,0.3)',
-    name='Shaded Area'
+    name='Advantage Area'
 ))
 
 # --- Regression Lines ---
