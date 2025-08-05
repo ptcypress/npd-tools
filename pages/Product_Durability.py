@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-# Load CSV from GitHub
-url = "https://raw.githubusercontent.com/ptcypress/npd-tools/main/data/durability_data.csv"
-df = pd.read_csv(url)
+# Load CSV from predefined path
+csv_path = "data/durability_data.csv"
+df = pd.read_csv(csv_path)
 df.columns = df.columns.str.strip()
 
 # Extract data
@@ -64,7 +64,7 @@ fig.update_layout(
         spikecolor="lightgray",
         spikethickness=0.7,
         spikedash="dot",
-        tickformat=".4f"
+        tickformat="e"  # scientific notation for clarity
     ),
     hoverlabel=dict(
         bgcolor="rgba(0,0,0,0)",
@@ -73,8 +73,8 @@ fig.update_layout(
     )
 )
 
-# Optional markdown note
-st.markdown("This plot shows the accumulated material loss for both brushes over extended runtime.")
+# Description
+st.markdown("This plot shows the accumulated material loss for both brushes over runtime. Lower values indicate superior durability.")
 
 # Display plot
 st.plotly_chart(fig, use_container_width=True)
