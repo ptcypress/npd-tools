@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from scipy.integrate import quad
-from scipy.optimize import fsolve
 
 # Load durability data
 csv_path = "data/durability_data.csv"
@@ -27,28 +26,22 @@ model_angleon = LinearRegression().fit(X_poly, y_angleon)
 model_competitor = LinearRegression().fit(X_poly, y_competitor)
 
 # Define prediction functions
-poly_transform = lambda val: poly.transform(np.log(np.array([[val]])))
+predict_angleon = lambda x_val: model_angleon.predict(poly.transform(np.log(np.array([[x_val]]))))[0]
+predict_competitor = lambda x_val: model_competitor.predict(poly.transform(np.log(np.array([[x_val]]))))[0]
 
-def f(x_val):
-    x_val = float(np.squeeze(x_val))
-    return model_angleon.predict(poly_transform(x_val))[0]
+# Area between curves and % improvement
+x_start, x_end = 6.3, 50
+area, _ = quad(lambda x: predict_angleon(x) - predict_competitor(x), x_start, x_end)
+baseline_area, _ = quad(lambda x: predict_competitor(x), x_start, x_end)
+percent_improvement = (area / baseline_area) * 100
 
-def g(x_val):
-    x_val = float(np.squeeze(x_val))
-    return model_competitor.predict(poly_transform(x_val))[0]
+# Plotting range
+x_range = np.linspace(x_start, x_end, 300)
+y_pred_angleon = [predict_angleon(xi) for xi in x_range]
+y_pred_competitor = [predict_competitor(xi) for xi in x_range]
 
-# Area between curves from x = 6.3 to 50
-area, _ = quad(lambda x_val: abs(f(x_val) - g(x_val)), 6.3, 50)
-
-# Predict over a restricted range for plotting
-x_range = np.linspace(6.3, 50, 300).reshape(-1, 1)
-log_x_range = np.log(x_range)
-y_pred_angleon = model_angleon.predict(poly.transform(log_x_range))
-y_pred_competitor = model_competitor.predict(poly.transform(log_x_range))
-
-# Determine max y for setting fixed axis range with buffer
-y_max = max(y_pred_angleon.max(), y_pred_competitor.max())
-y_max_buffered = y_max * 1.05
+# Axis limits
+y_max = max(max(y_pred_angleon), max(y_pred_competitor)) * 1.05
 
 # Streamlit layout
 st.set_page_config(page_title="Durability vs Belt Speed", layout="wide")
@@ -58,49 +51,39 @@ st.subheader("Rate of Material Loss vs Belt Speed")
 # Plot
 fig = go.Figure()
 
-# AngleOn line
-fig.add_trace(go.Scatter(
-    x=x_range.flatten(), y=y_pred_angleon,
-    mode='lines',
-    name='AngleOn',
-    line=dict(color='blue', width=3)
-))
-
-# Competitor line
-fig.add_trace(go.Scatter(
-    x=x_range.flatten(), y=y_pred_competitor,
-    mode='lines',
-    name='Competitor',
-    line=dict(color='red', width=3)
-))
+# Lines
+fig.add_trace(go.Scatter(x=x_range, y=y_pred_angleon, mode='lines', name='AngleOn™', line=dict(color='blue', width=3)))
+fig.add_trace(go.Scatter(x=x_range, y=y_pred_competitor, mode='lines', name='Competitor', line=dict(color='red', width=3)))
 
 # Shaded area between curves
 fig.add_trace(go.Scatter(
-    x=np.concatenate([x_range.flatten(), x_range.flatten()[::-1]]),
+    x=np.concatenate([x_range, x_range[::-1]]),
     y=np.concatenate([y_pred_angleon, y_pred_competitor[::-1]]),
     fill='toself',
     fillcolor='rgba(100,100,100,0.2)',
     line=dict(color='rgba(255,255,255,0)'),
     hoverinfo='skip',
-    name='Difference Area'
+    name='Advantage Area'
 ))
 
-# Update layout
+# Annotation
+fig.add_annotation(
+    x=15,
+    y=y_max * 0.25,
+    text=(f"Cumulative performance gap = {area:.6e} in²/min·sec<br>"
+          f"Relative improvement = {percent_improvement:.2f}%"),
+    showarrow=False,
+    font=dict(size=13)
+)
+
+# Layout
 fig.update_layout(
     xaxis_title="Belt Speed (in/sec)",
     yaxis_title="Rate of Material Loss (in/min)",
     height=650,
     hovermode='x',
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="center",
-        x=0.5
-    ),
     xaxis=dict(
-        type='linear',
-        range=[6.3, 50],
+        range=[x_start, x_end],
         showspikes=True,
         spikemode="across",
         spikesnap="cursor",
@@ -110,7 +93,7 @@ fig.update_layout(
         spikedash="dot"
     ),
     yaxis=dict(
-        range=[0, y_max_buffered],
+        range=[0, y_max],
         tickformat='e',
         showspikes=True,
         spikemode="across",
@@ -124,26 +107,25 @@ fig.update_layout(
         bgcolor="rgba(0,0,0,0)",
         font_size=12,
         font_family="Arial"
+    ),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="center",
+        x=0.5
     )
 )
 
-# Annotation (moved out of the way)
-fig.add_annotation(
-    x=15,
-    y=y_max_buffered * 0.25,
-    text=f"Cumulative performance gap = {area:.6e} in²/min·sec",
-    showarrow=False,
-    font=dict(size=13)
-)
+st.plotly_chart(fig, use_container_width=True)
 
-# Caption
+# Explanatory text
 st.markdown("""
 This chart compares the **rate of material loss** across belt speeds for two materials.
 The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
 Lower material loss indicates superior wear resistance under accelerated wear conditions.
 """)
 
-st.markdown("""Accelerated wear test designed to mimic real-use testing applied forces. Modified belt sander fixture (220-grit) was used.""")
-
-# Show plot
-st.plotly_chart(fig, use_container_width=True)
+st.markdown("""
+Accelerated wear test designed to mimic real-use testing applied forces. Modified belt sander fixture (220-grit) was used.
+""")
