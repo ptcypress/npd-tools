@@ -2,6 +2,19 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import os
+from scipy.interpolate import interp1d
+import numpy as np
+
+# Interpolation functions
+angleon_interp = interp1d(x_angleon, y_loss, kind='linear', fill_value='extrapolate')
+competitor_interp = interp1d(x_comp, y_loss, kind='linear', fill_value='extrapolate')
+
+# Smooth x range
+x_smooth = np.linspace(min(x_angleon.min(), x_comp.min()), max(x_angleon.max(), x_comp.max()), 500)
+
+# Smoothed y values
+y_angleon_smooth = angleon_interp(x_smooth)
+y_comp_smooth = competitor_interp(x_smooth
 
 # Local file path
 csv_path = "data/product_durability.csv"
@@ -31,20 +44,21 @@ else:
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
-            x=x_angleon, y=y_loss,
-            mode='lines+markers',
+            x=x_smooth, y=y_angleon_smooth,
+            mode='lines',
             name='AngleOn™',
             line=dict(color='blue', width=3),
-            hovertemplate='Hour: %{x: .2f}<br>Loss: %{y: .2f}%'
+            hovertemplate='Hour: %{x:.2f}<br>Loss: %{y:.2f}%'
         ))
 
         fig.add_trace(go.Scatter(
-            x=x_comp, y=y_loss,
-            mode='lines+markers',
+            x=x_smooth, y=y_comp_smooth,
+            mode='lines',
             name='Competitor',
             line=dict(color='red', width=3),
-            hovertemplate='Hour: %{x: .2f}<br>Loss: %{y: .2f}%'
+            hovertemplate='Hour: %{x:.2f}<br>Loss: %{y:.2f}%'
         ))
+
 
         fig.update_layout(
             xaxis_title="Runtime (Hours)",
