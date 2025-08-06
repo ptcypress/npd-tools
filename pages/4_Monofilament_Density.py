@@ -65,7 +65,7 @@ st.title("Monofilament Pattern Visualizer")
 
 # Inputs
 pattern = st.selectbox("Pattern Type", ["hex", "grid"])
-density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=100)
+density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
 diameter = st.slider("Filament Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
 
 positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
