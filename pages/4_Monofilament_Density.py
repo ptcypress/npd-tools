@@ -6,7 +6,7 @@ import streamlit as st
 def generate_monofilament_data(density, diameter, pattern="hex"):
     area_each = np.pi * (diameter / 2) ** 2
     total_area = density * area_each
-    percent_coverage = total_area * 100
+    percent_coverage = total_area * 100  # assumes unit area of 1 in²
 
     positions = []
 
@@ -43,7 +43,8 @@ def draw_monofilament(positions, diameter, title, density, total_area, percent_c
 
     if len(positions) > 0:
         ax.scatter(positions[:, 0], positions[:, 1], 
-                   s=(diameter * 72)**2, edgecolor='black', facecolors='gray', linewidth=0.2)
+                   s=(diameter * 1000)**2,  # bigger for visual clarity
+                   edgecolor='black', facecolors='gray', linewidth=0.2)
 
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], 'k-', lw=1)
     ax.set_aspect('equal')
@@ -53,8 +54,8 @@ def draw_monofilament(positions, diameter, title, density, total_area, percent_c
     ax.set_yticks([0, 0.5, 1])
     ax.set_xlabel("inches")
     ax.set_ylabel("inches")
-    ax.set_title(f"{title}\n{density} ends/in², {diameter}\" dia")
-    ax.text(0.5, -0.12, f"Monofilament area = {total_area:.4f} in²\nCoverage = {percent_coverage:.1f}%", 
+    ax.set_title(f"{title}\n{density} ends/in², {diameter:.4f}\" dia")
+    ax.text(0.5, -0.15, f"Monofilament area = {total_area:.4f} in²\nCoverage = {percent_coverage:.1f}%", 
             transform=ax.transAxes, ha='center', fontsize=9)
     plt.tight_layout()
     return fig
@@ -66,7 +67,7 @@ st.title("Monofilament Pattern Visualizer")
 # Inputs
 pattern = st.selectbox("Pattern Type", ["hex", "grid"])
 density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
-diameter = st.slider("Filament Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
+diameter = st.slider("Filament Diameter (in)", 0.002, 0.020, 0.006, step=0.0005)
 
 positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
 fig = draw_monofilament(positions, diameter, "Custom Pattern", density, total_area, percent_coverage)
