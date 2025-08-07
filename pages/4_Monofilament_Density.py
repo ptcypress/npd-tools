@@ -1,31 +1,41 @@
+import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-import streamlit as st
 
+# ---------------------------
+# Preset filament configurations
+# ---------------------------
+PRESETS = {
+    "Custom": None,
+    "AngleOn™ (6910 epi², 0.006\")": (6910, 0.006),
+    "Competitor (9750 epi², 0.0045\")": (9750, 0.0045),
+    "XT10 (2275 epi², 0.010\")": (2275, 0.010),
+    "XT16 (1135 epi², 0.016\")": (1135, 0.016),
+}
+
+# ---------------------------
+# Calculate monofilament positions
+# ---------------------------
 @st.cache_resource
 def generate_monofilament_data(density, diameter, pattern="hex"):
     area_each = np.pi * (diameter / 2) ** 2
-    total_area = density * area_each
-    percent_coverage = total_area * 100
+    total_area = area_each * density  # in²
+    percent_coverage = total_area * 100  # % of 1in² box
 
     positions = []
 
     if pattern == "hex":
-        n_total = density
-        n_rows = int(np.sqrt(n_total / (np.sqrt(3) / 2)))
-        row_spacing = 1.0 / n_rows
-        col_spacing = row_spacing * np.sqrt(3) / 2
-
+        spacing = np.sqrt(2 / (np.sqrt(3) * density))
         y = 0
-        row_num = 0
+        row = 0
         while y < 1.0:
-            x_offset = 0 if row_num % 2 == 0 else col_spacing / 2
+            x_offset = 0 if row % 2 == 0 else spacing / 2
             x = x_offset
             while x < 1.0:
                 positions.append((x, y))
-                x += col_spacing
-            y += row_spacing
-            row_num += 1
+                x += spacing
+            y += spacing * np.sqrt(3) / 2
+            row += 1
 
     elif pattern == "grid":
         n_filaments = int(np.sqrt(density))
@@ -38,12 +48,19 @@ def generate_monofilament_data(density, diameter, pattern="hex"):
 
     return np.array(positions), total_area, percent_coverage
 
+# ---------------------------
+# Draw the visual pattern
+# ---------------------------
 def draw_monofilament(positions, diameter, title, density, total_area, percent_coverage):
     fig, ax = plt.subplots(figsize=(6, 6), dpi=150)
 
     if len(positions) > 0:
-        ax.scatter(positions[:, 0], positions[:, 1], 
-                   s=(diameter * 72)**2, edgecolor='black', facecolors='gray', linewidth=0.2)
+        pt_per_inch = 72
+        diameter_pt = diameter * pt_per_inch
+        size_pt_squared = (diameter_pt / 2) ** 2 * np.pi
+
+        ax.scatter(positions[:, 0], positions[:, 1],
+                   s=size_pt_squared, edgecolor='black', facecolors='gray', linewidth=0.2)
 
     ax.plot([0, 1, 1, 0, 0], [0, 0, 1, 1, 0], 'k-', lw=1)
     ax.set_aspect('equal')
@@ -54,20 +71,33 @@ def draw_monofilament(positions, diameter, title, density, total_area, percent_c
     ax.set_xlabel("inches")
     ax.set_ylabel("inches")
     ax.set_title(f"{title}\n{density} ends/in², {diameter}\" dia")
-    ax.text(0.5, -0.12, f"Monofilament area = {total_area:.4f} in²\nCoverage = {percent_coverage:.1f}%", 
-            transform=ax.transAxes, ha='center', fontsize=9)
+    
+    fig.text(0.5, 0.01, f"Monofilament area = {total_area:.4f} in²  •  Coverage = {percent_coverage:.1f}%",
+             ha='center', fontsize=9)
     plt.tight_layout()
     return fig
 
+# ---------------------------
 # Streamlit UI
+# ---------------------------
 st.set_page_config(page_title="Monofilament Pattern Viewer", layout="centered")
 st.title("Monofilament Pattern Visualizer")
 
-# Inputs
-pattern = st.selectbox("Pattern Type", ["hex", "grid"])
-density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
-diameter = st.slider("Filament Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
+# Layout
+col1, col2, col3 = st.columns(3)
+with col1:
+    pattern = st.selectbox("Pattern Type", ["hex", "grid"])
+
+with col2:
+    preset = st.selectbox("Choose Preset", list(PRESETS.keys()))
+
+if preset == "Custom":
+    with col3:
+        density = st.slider("Density (ends/in²)", 1000, 12000, 6912, step=10)
+    diameter = st.slider("Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
+else:
+    density, diameter = PRESETS[preset]
 
 positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
-fig = draw_monofilament(positions, diameter, "Custom Pattern", density, total_area, percent_coverage)
+fig = draw_monofilament(positions, diameter, preset, density, total_area, percent_coverage)
 st.pyplot(fig)
