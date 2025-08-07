@@ -50,7 +50,7 @@ st.subheader("Rate of Material Loss vs Belt Speed")
 
 # Explanatory text
 st.markdown("""
-This chart compares the **rate of material loss** across belt speeds for two materials.
+This chart compares the **rate of material loss** across belt speeds for AngleOn™ and Competitor product.
 The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
 Lower material loss indicates superior wear resistance under accelerated wear conditions.
 """)
