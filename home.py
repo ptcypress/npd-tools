@@ -25,14 +25,8 @@ Use the sidebar on the left to navigate between apps:
 
     
 ---
-
-### 📌 How to Use
-- Choose an app from the sidebar.
-- Each app will load in its own view.
-
-
----
 """)
+
 
 
 
