@@ -33,7 +33,7 @@ predict_competitor = lambda x_val: model_competitor.predict(poly.transform(np.lo
 x_start, x_end = 6.3, 50
 area, _ = quad(lambda x: predict_angleon(x) - predict_competitor(x), x_start, x_end)
 baseline_area, _ = quad(lambda x: predict_competitor(x), x_start, x_end)
-percent_improvement = (area / baseline_area) * 100
+percent_improvement = abs((area / baseline_area) * 100)
 
 # Plotting range
 x_range = np.linspace(x_start, x_end, 300)
