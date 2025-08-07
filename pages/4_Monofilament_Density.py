@@ -94,12 +94,7 @@ with col2:
 if preset == "Custom":
     with col3:
         density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
-    # Unlabeled diameter slider
-    # Set default before slider so it's accessible for dynamic label
-        default_diameter = 0.006
-        diameter = st.slider(f"Filament Diameter (in): {default_diameter:.4f}", 0.002, 0.02, default_diameter, step=0.0005)
-
-
+        diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
 else:
     density, diameter = PRESETS[preset]
 
