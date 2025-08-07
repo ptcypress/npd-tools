@@ -95,8 +95,8 @@ else:
         fig.add_annotation(
             x=x_smooth[len(x_smooth)//3],
             y=max(y_comp_smooth) * 0.7,
-            text=(f"Cumulative performance gap = {area_diff:.6f}<br>"
-                  f"Relative improvement = {percent_improvement:.2f}%"),
+            text=(f"Advantage area = {area_diff:.6f}<br>"
+                  f"Relative advantage = {percent_improvement:.2f}%"),
             showarrow=False,
             font=dict(size=13)
         )
