@@ -93,8 +93,10 @@ with col2:
 
 if preset == "Custom":
     with col3:
-        density = st.slider("Density (ends/in²)", 1000, 12000, 6912, step=10)
-    diameter = st.slider("Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
+        density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
+
+    diameter = st.slider("Filament Diameter (in)", 0.002, 0.02, 0.006, step=0.0005)
+    st.write(f"Selected Diameter: `{diameter:.4f}\"`")
 else:
     density, diameter = PRESETS[preset]
 
