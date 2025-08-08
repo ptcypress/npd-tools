@@ -19,6 +19,7 @@ Use the sidebar on the left to navigate between apps:
 -  **Product Physical Characteristics:**
     -  Monofilament Coverage (Comparison of Coverage Area Across Different Brush Types)
     -  Monofilament Density (Area Covered by Monofilament per Square Inch of Brush)
+    -  Angle Decay
 -  **Product Functional Characteristics:**  
     -  Velocity Boxplot
     -  Velocity vs Pressure
@@ -27,6 +28,7 @@ Use the sidebar on the left to navigate between apps:
     
 ---
 """)
+
 
 
 
