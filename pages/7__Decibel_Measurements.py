@@ -59,7 +59,7 @@ fig.update_layout(
     yaxis=dict(range=[y_min - buffer, y_max + buffer]),
     template='plotly_white',
     height=800,
-    margin=dict(t=50, b=50, l=50, r=50)
+    margin=dict(t=50, b=50, l=50, r=50),
     showlegend=False
 )
 
