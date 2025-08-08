@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Load CSV
-csv_path = "decibel_measurements.csv"  # Adjust path as needed
+csv_path = "data/decibel_measurements.csv"  # Adjust path as needed
 df = pd.read_csv(csv_path)
 
 # Select columns to plot
