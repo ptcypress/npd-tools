@@ -51,7 +51,8 @@ fig.update_layout(
     xaxis_title="Brush Type",
     yaxis_title="Velocity (in/sec)",
     legend_title="Brush Type",
-    height=600
+    height=600,
+    showlegend=False
 )
 
 # Display the plot
