@@ -86,3 +86,6 @@ with st.expander("Show Rate of Change (dy/dx)"):
 # --- Optional Data Table ---
 with st.expander("Show Raw Data"):
     st.dataframe(df[["Date", "Angle"]])
+
+st.markdown(f"### 📉 Predicted Long-Term Minimum Angle: **{c:.3f}°**")
+
