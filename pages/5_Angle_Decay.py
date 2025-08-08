@@ -33,10 +33,28 @@ stable_day = x_pred[stable_idx]
 stable_date = df["Date"].min() + pd.Timedelta(days=int(stable_day))
 
 # --- Plot ---
+# --- Plot with stabilization indicators ---
 fig, ax1 = plt.subplots(figsize=(10, 5))
+
+# Plot data points and fitted curve
 ax1.plot(df["Date"], y_data, 'o', label="Observed", color="blue")
 ax1.plot(df["Date"].min() + pd.to_timedelta(x_pred, unit='D'), y_pred, '-', label="Exponential Fit", color="black")
-ax1.axvline(stable_date, color='red', linestyle='--', label=f'Stabilizes ~{stable_date.date()}')
+
+# Draw vertical and horizontal dashed lines at stabilization
+stable_angle = decay_model(stable_day, *popt)
+ax1.axvline(stable_date, color='red', linestyle='--')
+ax1.axhline(stable_angle, color='red', linestyle='--')
+
+# Annotate stabilization point
+ax1.annotate(f"Stabilizes\n≈ {stable_angle:.2f}°",
+             xy=(stable_date, stable_angle),
+             xytext=(10, 10),
+             textcoords="offset points",
+             arrowprops=dict(arrowstyle="->", color="red"),
+             fontsize=10,
+             color="red")
+
+# Labels, legend, formatting
 ax1.set_ylabel("Angle (°)")
 ax1.set_xlabel("Date")
 ax1.legend()
@@ -44,6 +62,7 @@ ax1.grid(True)
 
 st.title("Angle Stabilization Over Time")
 st.pyplot(fig)
+
 
 # --- Optional Derivative Plot ---
 with st.expander("Show Rate of Change (dy/dx)"):
