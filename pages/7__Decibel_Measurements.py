@@ -7,7 +7,7 @@ csv_path = "data/decibel_measurements.csv"
 df = pd.read_csv(csv_path)
 
 # Select relevant columns
-columns_to_plot = ['Ambient', 'Empty Feeder', 'Full Feeder', 'AngleOn™']
+columns_to_plot = ['Ambient', 'Empty Feeder', 'Full Feeder', 'Full Feeder w/ AngleOn™']
 filtered_df = df[columns_to_plot]
 
 # Melt to long format for Plotly
