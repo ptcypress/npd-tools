@@ -11,7 +11,7 @@ import os
 # Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
 st.title("Regression Comparison: AngleOn™ vs Competitor")
-st.subheader("Velocity vs Pressure — AngleOn™ vs Competitor")
+st.subheader("Velocity vs Pressure")
 
 # Load data
 csv_path = "data/velocity_data.csv"
