@@ -4,7 +4,18 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 from datetime import datetime
+import seaborn as sns
 
+# Apply consistent styling
+sns.set_style("whitegrid")
+mpl.rcParams.update({
+    'font.size': 10,
+    'axes.titlesize': 12,
+    'axes.labelsize': 11,
+    'xtick.labelsize': 9,
+    'ytick.labelsize': 9,
+    'legend.fontsize': 9,
+})
 # --- App title ---
 st.title("Angle Stabilization Over Time")
 
