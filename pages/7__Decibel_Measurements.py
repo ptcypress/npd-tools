@@ -60,6 +60,7 @@ fig.update_layout(
     template='plotly_white',
     height=800,
     margin=dict(t=50, b=50, l=50, r=50)
+    showlegend=False
 )
 
 # Streamlit display
