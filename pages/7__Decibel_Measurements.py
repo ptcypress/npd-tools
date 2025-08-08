@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Load CSV
-csv_path = "data/decibel_measurements.csv"  # Adjust path as needed
+csv_path = "data/decibel_measurements.csv"
 df = pd.read_csv(csv_path)
 
 # Select columns to plot
@@ -16,7 +16,7 @@ melted_df = filtered_df.melt(var_name='Condition', value_name='dBA')
 # Create boxplot
 fig = go.Figure()
 
-# Add boxplots for each condition
+# Add boxplots
 for condition in columns_to_plot:
     fig.add_trace(go.Box(
         y=melted_df[melted_df['Condition'] == condition]['dBA'],
@@ -30,7 +30,7 @@ fig.add_shape(
     type='line',
     x0=-0.5, x1=len(columns_to_plot)-0.5,
     y0=85, y1=85,
-    line=dict(color='red', dash='dash'),
+    line=dict(color='red', dash='dash')
 )
 
 fig.add_annotation(
@@ -42,13 +42,17 @@ fig.add_annotation(
     font=dict(color="red", size=12)
 )
 
-# Layout formatting
+# Dynamic y-axis range with buffer
+y_min = melted_df['dBA'].min()
+y_max = melted_df['dBA'].max()
+buffer = (y_max - y_min) * 0.2  # 20% buffer
 fig.update_layout(
     title="Decibel Levels by Condition",
     yaxis_title="Sound Level (dBA)",
     xaxis_title="Condition",
-    yaxis=dict(range=[filtered_df.min().min() - 5, filtered_df.max().max() + 5]),
-    template='plotly_white'
+    yaxis=dict(range=[y_min - buffer, y_max + buffer]),
+    template='plotly_white',
+    height=600  # Increased plot height
 )
 
 # Streamlit app
