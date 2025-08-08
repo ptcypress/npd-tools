@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from datetime import datetime
 import seaborn as sns
 
@@ -75,7 +76,7 @@ ax.grid(True)
 ax.legend()
 
 # --- Display plot and summary ---
-st.pyplot(fig)
+st.pyplot(fig, use_container_width=True)
 st.markdown(f"### 📉 Predicted Long-Term Minimum Angle: **{min_angle:.3f}°**")
 
 # --- Optional raw data view ---
