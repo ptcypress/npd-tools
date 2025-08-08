@@ -22,10 +22,12 @@ Use the sidebar on the left to navigate between apps:
 -  **Product Functional Characteristics:**  
     -  Velocity Boxplot
     -  Velocity vs Pressure
+    -  Decibel Measurements
 
     
 ---
 """)
+
 
 
 
