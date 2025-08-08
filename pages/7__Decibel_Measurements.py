@@ -21,7 +21,7 @@ for condition in columns_to_plot:
     fig.add_trace(go.Box(
         y=melted_df[melted_df['Condition'] == condition]['dBA'],
         name=condition,
-        boxpoints=True,  # Hide outlier dots
+        boxpoints=False,  # Hide outlier dots
         line=dict(width=0),  # Hide whiskers ("fences")
         marker_color='blue',
         fillcolor='lightblue',
