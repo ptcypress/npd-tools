@@ -64,4 +64,5 @@ fig.update_layout(
 
 # Streamlit display
 st.title("Decibel Measurement Visualization")
-st.plotly_cha_
+st.plotly_chart(fig, use_container_width=True)
+
