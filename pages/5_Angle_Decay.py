@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 # --- Load Data ---
-df = pd.read_csv("angle_decay.csv")
+df = pd.read_csv("data/angle_decay.csv")
 df["Date"] = pd.to_datetime(df["Date"] + "-2024")  # Add year if missing
 df["Day"] = (df["Date"] - df["Date"].min()).dt.days
 
