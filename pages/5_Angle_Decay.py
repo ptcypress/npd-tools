@@ -139,8 +139,20 @@ STD_COL = expected_cols.get("st dev")
 if not np.issubdtype(df[DATE_COL].dtype, np.datetime64):
     df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
 
-# Drop NaNs, sort
-_df = df[[DATE_COL, ANGLE_COL] + ([STD_COL] if STD_COL else [])].dropna().sort_values(DATE_COL).reset_index(drop=True)
+# Drop NaNs in core columns only (keep optional St Dev even if missing), then sort
+core_cols = [DATE_COL, ANGLE_COL]
+opt_cols = [STD_COL] if STD_COL else []
+_df = (
+    df[core_cols + opt_cols]
+    .dropna(subset=core_cols)
+    .sort_values(DATE_COL)
+    .reset_index(drop=True)
+)
+
+# Guard: need at least 2 valid rows to fit the model
+if len(_df) < 2:
+    st.error("Need at least 2 rows with valid `Date` and `Angle` to fit the model.")
+    st.stop()
 
 # ---------------------------
 # Modeling
