@@ -98,23 +98,11 @@ def stabilization_time(A: float, k: float, C: float, y0: float, eps_deg: float) 
 st.title("Angle Decay (Exponential) 📉")
 st.caption("Fit an exponential decay A·e^{-k t} + C and estimate when the angle stabilizes.")
 
-with st.sidebar:
-    st.header("Inputs")
-    st.markdown(
-        """
-        **Data source:** `data/angle_decay.csv`
-        
-        **Required columns**
-        - `Date` (any parsable date format)
-        - `Angle` (float)
-        Optional: `St Dev` for reference/error bars
-        """
-    )
-
-    default_eps = st.number_input("Stabilization band ± (deg)", min_value=0.01, max_value=5.0, value=0.25, step=0.01)
-    show_points = st.checkbox("Show data points", value=True)
-    show_residuals = st.checkbox("Show residuals", value=False)
-    ref_year = st.number_input("Assumed year (for dates like '31-Jul')", min_value=2000, max_value=2100, value=datetime.today().year, step=1)
+# (No sidebar controls needed)
+# Defaults used for consistency across pages
+default_eps = 0.25
+show_points = True
+ref_year = datetime.today().year
 
 # ---------------------------
 # Data loading
@@ -304,17 +292,6 @@ with right:
         st.dataframe(_df, use_container_width=True, height=240)
 
 # ---------------------------
-# Residuals (optional)
-# ---------------------------
-if show_residuals:
-    import plotly.graph_objects as go
-    res_fig = go.Figure()
-    residuals = _df[ANGLE_COL] - _exp_decay(_t, A, k, C)
-    res_fig.add_trace(go.Scatter(x=_df[DATE_COL], y=residuals, mode="markers+lines", name="Residuals"))
-    res_fig.update_layout(template="plotly_white", height=280, margin=dict(l=10, r=10, t=30, b=10), xaxis_title="Date", yaxis_title="Residual (deg)")
-    st.plotly_chart(res_fig, use_container_width=True)
-
-# ---------------------------
 # Notes
 # ---------------------------
-st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), controls in sidebar, Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
+st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
