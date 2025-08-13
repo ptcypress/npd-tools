@@ -294,4 +294,4 @@ with right:
 # ---------------------------
 # Notes
 # ---------------------------
-st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
+#st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
