@@ -269,9 +269,13 @@ with left:
     fig.add_hline(y=C + default_eps, line_dash="dash", annotation_text=f"+{default_eps:.2f}°", annotation_position="top right")
     fig.add_hline(y=C - default_eps, line_dash="dash", annotation_text=f"-{default_eps:.2f}°", annotation_position="bottom right")
 
-    # Stabilization date marker
+    # Stabilization date marker (avoid Plotly datetime+annotation bug by separating line and annotation)
     if stabilizes_on is not None and stabilizes_on >= _df[DATE_COL].min():
-        fig.add_vline(x=stabilizes_on, line_dash="dot", annotation_text=f"Stabilizes ≈ {stabilizes_on.date()}", annotation_position="top")
+        x_line = pd.to_datetime(stabilizes_on)
+        # Draw the vertical line without annotation to avoid internal timestamp-mean error
+        fig.add_vline(x=x_line, line_dash="dot")
+        # Add a separate annotation pinned to the top of the plotting area
+        fig.add_annotation(x=x_line, xref="x", y=1.02, yref="paper", text=f"Stabilizes ≈ {x_line.date()}", showarrow=False, yanchor="bottom")
 
     fig.update_layout(
         template="plotly_white",
