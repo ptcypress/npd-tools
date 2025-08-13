@@ -114,6 +114,7 @@ with st.sidebar:
     default_eps = st.number_input("Stabilization band ± (deg)", min_value=0.01, max_value=5.0, value=0.25, step=0.01)
     show_points = st.checkbox("Show data points", value=True)
     show_residuals = st.checkbox("Show residuals", value=False)
+    ref_year = st.number_input("Assumed year (for dates like '31-Jul')", min_value=2000, max_value=2100, value=datetime.today().year, step=1)
 
 # ---------------------------
 # Data loading
@@ -142,8 +143,28 @@ for key in ["st dev", "stdev", "std dev", "std_dev", "st deviation", "st_deviati
         break
 
 # Parse dates
+_date_strategy = "unknown"
 if not np.issubdtype(df[DATE_COL].dtype, np.datetime64):
-    df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
+    raw_date_col = df[DATE_COL].copy()
+    df[DATE_COL] = pd.to_datetime(raw_date_col, errors="coerce")
+    _date_strategy = "direct"
+    if df[DATE_COL].isna().all():
+        s = raw_date_col.astype(str).str.strip()
+        try:
+            # e.g., "31-Jul" -> "31-Jul 2025" (assume dayfirst for dd-Mon)
+            df[DATE_COL] = pd.to_datetime(s + f" {int(ref_year)}", errors="coerce", dayfirst=True)
+            _date_strategy = "append_year_space_dayfirst"
+        except Exception:
+            pass
+        if df[DATE_COL].isna().all():
+            try:
+                # e.g., "7/31" -> "7/31/2025" (US month/day)
+                df[DATE_COL] = pd.to_datetime(s + f"/{int(ref_year)}", errors="coerce")
+                _date_strategy = "append_slash_year"
+            except Exception:
+                pass
+        if df[DATE_COL].isna().all():
+            _date_strategy = "coerce_failed"
 
 # Coerce Angle to numeric (strip non-numeric chars like degree symbols first)
 if df[ANGLE_COL].dtype == object:
@@ -185,6 +206,7 @@ if len(_df) < 2:
             "invalid_dates": _invalid_date,
             "non_numeric_angles": _invalid_angle,
             "valid_rows": len(_df),
+            "date_parse_strategy": _date_strategy,
         })
     st.stop()
 
