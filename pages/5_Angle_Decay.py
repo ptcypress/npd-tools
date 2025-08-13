@@ -247,6 +247,7 @@ with left:
             x=dates_dense, y=y_dense,
             mode="lines",
             name="Fit: A·e^{-k t} + C",
+            line=dict(color="blue", width=3),
         )
     )
 
@@ -268,7 +269,7 @@ with left:
     fig.update_layout(
         template="plotly_white",
         height=520,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        legend=dict(orientation="h", yanchor="bottom", y=1.1, xanchor="left", x=0),
         margin=dict(l=10, r=10, t=30, b=10),
         xaxis_title="Date",
         yaxis_title="Angle (deg)",
@@ -294,4 +295,4 @@ with right:
 # ---------------------------
 # Notes
 # ---------------------------
-#st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
+st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
