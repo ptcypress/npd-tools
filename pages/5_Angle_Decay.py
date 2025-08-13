@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from io import StringIO
 
 # ---------------------------
 # Page config (match other pages)
@@ -101,13 +100,16 @@ st.caption("Fit an exponential decay A·e^{-k t} + C and estimate when the angle
 
 with st.sidebar:
     st.header("Inputs")
-    uploaded = st.file_uploader("Data file (CSV)", type=["csv"])    
-    st.markdown("""
-    **Required columns**
-    - `Date` (any parsable date format)
-    - `Angle` (float)
-    Optional: `St Dev` for reference/error bars
-    """)
+    st.markdown(
+        """
+        **Data source:** `data/angle_decay.csv`
+        
+        **Required columns**
+        - `Date` (any parsable date format)
+        - `Angle` (float)
+        Optional: `St Dev` for reference/error bars
+        """
+    )
 
     default_eps = st.number_input("Stabilization band ± (deg)", min_value=0.01, max_value=5.0, value=0.25, step=0.01)
     show_points = st.checkbox("Show data points", value=True)
@@ -116,15 +118,12 @@ with st.sidebar:
 # ---------------------------
 # Data loading
 # ---------------------------
-if uploaded is not None:
-    df = pd.read_csv(uploaded)
-else:
-    # Minimal placeholder so the page renders a consistent layout
-    df = pd.DataFrame({
-        "Date": pd.to_datetime([datetime.today() - timedelta(days=d) for d in [21, 14, 7, 0]]),
-        "Angle": [23.5, 22.1, 21.3, 20.9],
-        "St Dev": [0.7, 0.6, 0.5, 0.5],
-    })
+DATA_PATH = "data/angle_decay.csv"
+try:
+    df = pd.read_csv(DATA_PATH)
+except Exception as e:
+    st.error(f"Couldn't read {DATA_PATH}: {e}")
+    st.stop()
 
 # Normalize / validate columns
 expected_cols = {c.lower(): c for c in df.columns}
