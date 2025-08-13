@@ -125,19 +125,40 @@ except Exception as e:
     st.error(f"Couldn't read {DATA_PATH}: {e}")
     st.stop()
 
-# Normalize / validate columns
-expected_cols = {c.lower(): c for c in df.columns}
-if "date" not in expected_cols or "angle" not in expected_cols:
+# Normalize / validate columns (strip header whitespace, case-insensitive)
+norm_map = {str(c).strip().lower(): c for c in df.columns}
+if "date" not in norm_map or "angle" not in norm_map:
     st.error("CSV must include `Date` and `Angle` columns.")
     st.stop()
 
-DATE_COL = expected_cols["date"]
-ANGLE_COL = expected_cols["angle"]
-STD_COL = expected_cols.get("st dev")
+DATE_COL = norm_map["date"]
+ANGLE_COL = norm_map["angle"]
+
+# Optional std dev column (several possible header spellings)
+STD_COL = None
+for key in ["st dev", "stdev", "std dev", "std_dev", "st deviation", "st_deviation", "sd"]:
+    if key in norm_map:
+        STD_COL = norm_map[key]
+        break
 
 # Parse dates
 if not np.issubdtype(df[DATE_COL].dtype, np.datetime64):
     df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
+
+# Coerce Angle to numeric (strip non-numeric chars like degree symbols first)
+if df[ANGLE_COL].dtype == object:
+    df[ANGLE_COL] = (
+        df[ANGLE_COL]
+        .astype(str)
+        .str.strip()
+        .str.replace(r"[^0-9+\-\.eE]", "", regex=True)
+    )
+df[ANGLE_COL] = pd.to_numeric(df[ANGLE_COL], errors="coerce")
+
+# Diagnostics before filtering
+_total_rows = len(df)
+_invalid_date = int(df[DATE_COL].isna().sum())
+_invalid_angle = int(df[ANGLE_COL].isna().sum())
 
 # Drop NaNs in core columns only (keep optional St Dev even if missing), then sort
 core_cols = [DATE_COL, ANGLE_COL]
@@ -151,7 +172,20 @@ _df = (
 
 # Guard: need at least 2 valid rows to fit the model
 if len(_df) < 2:
-    st.error("Need at least 2 rows with valid `Date` and `Angle` to fit the model.")
+    st.error(
+        f"Need at least 2 rows with valid `Date` and `Angle` to fit the model. "
+        f"Rows read: {_total_rows}, invalid dates: {_invalid_date}, non-numeric angles: {_invalid_angle}, "
+        f"valid rows: {len(_df)}."
+    )
+    with st.expander("Preview & parsing diagnostics"):
+        st.write("First 20 rows after parsing (before dropping invalids):")
+        st.dataframe(df.head(20), use_container_width=True)
+        st.write({
+            "rows_read": _total_rows,
+            "invalid_dates": _invalid_date,
+            "non_numeric_angles": _invalid_angle,
+            "valid_rows": len(_df),
+        })
     st.stop()
 
 # ---------------------------
