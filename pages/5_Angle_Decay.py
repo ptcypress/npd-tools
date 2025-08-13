@@ -221,14 +221,27 @@ t_star_days = stabilization_time(A, k, C, y0, default_eps)
 first_date = _df[DATE_COL].min()
 stabilizes_on = None if not np.isfinite(t_star_days) else (first_date + pd.to_timedelta(t_star_days, unit="D"))
 
-# Build dense curve for plotting
-if len(_df) > 1:
-    t_dense = np.linspace(_t.min(), _t.max() + max(7.0, 0.2 * (_t.max() - _t.min() + 1e-9)), 400)
-else:
-    t_dense = np.linspace(0, 14, 200)
+# Build dense curves for plotting (observed fit + projection)
 T0 = _df[DATE_COL].min()
-dates_dense = pd.to_datetime(T0) + pd.to_timedelta(t_dense, unit="D")
-y_dense = _exp_decay(t_dense, A, k, C)
+t_min = _t.min()
+t_max = _t.max()
+# Choose a projection horizon: until stabilization+buffer if finite, otherwise +60 days
+if np.isfinite(t_star_days):
+    horizon = max(t_max + 7.0, float(t_star_days) + 14.0)
+else:
+    horizon = t_max + 60.0
+
+# Dense grids
+t_fit_obs = np.linspace(t_min, t_max, 200)
+t_fit_proj = np.linspace(t_max, horizon, 200)
+
+# Map to dates
+dates_fit_obs = pd.to_datetime(T0) + pd.to_timedelta(t_fit_obs, unit="D")
+dates_fit_proj = pd.to_datetime(T0) + pd.to_timedelta(t_fit_proj, unit="D")
+
+# Model values
+y_fit_obs = _exp_decay(t_fit_obs, A, k, C)
+y_fit_proj = _exp_decay(t_fit_proj, A, k, C)
 
 # ---------------------------
 # Main layout
@@ -251,13 +264,23 @@ with left:
             )
         )
 
-    # Fitted curve
+    # Fitted curve (observed range)
     fig.add_trace(
         go.Scatter(
-            x=dates_dense, y=y_dense,
+            x=dates_fit_obs, y=y_fit_obs,
             mode="lines",
-            name="Fit: A·e^{-k t} + C",
+            name="Fit (observed)",
             line=dict(color="blue", width=3),
+        )
+    )
+
+    # Projection beyond last observation
+    fig.add_trace(
+        go.Scatter(
+            x=dates_fit_proj, y=y_fit_proj,
+            mode="lines",
+            name="Projection",
+            line=dict(color="blue", width=2, dash="dash"),
         )
     )
 
