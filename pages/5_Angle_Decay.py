@@ -204,6 +204,16 @@ if len(_df) < 2:
 params, yhat = fit_exp_decay(_df, DATE_COL, ANGLE_COL)
 A, k, C = params
 
+# Goodness of fit (R², adj R², RMSE) on observed points
+_y_obs = _df[ANGLE_COL].to_numpy()
+_ss_res = float(np.sum((_y_obs - yhat) ** 2))
+_ss_tot = float(np.sum((_y_obs - _y_obs.mean()) ** 2))
+r2 = float(1 - _ss_res / _ss_tot) if _ss_tot > 0 else float("nan")
+_n = len(_y_obs)
+_p = 3  # parameters A, k, C
+adj_r2 = float(1 - (1 - r2) * (_n - 1) / max(_n - _p, 1)) if _n > _p else float("nan")
+rmse = float(np.sqrt(_ss_res / _n)) if _n > 0 else float("nan")
+
 # Compute stabilization date
 _t = _to_days(_df[DATE_COL])
 y0 = _df[ANGLE_COL].iloc[0]
@@ -280,6 +290,12 @@ with left:
 
 with right:
     st.subheader("Model summary")
+    # Equation & fit quality
+    equation_text = f"y(t) = {A:.6f} · exp(-{k:.6f} · t) + {C:.6f}"
+    st.markdown("**Equation (t in days since first measurement):**")
+    st.code(equation_text, language="text")
+    st.metric("R²", f"{r2:.4f}")
+    st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
     st.metric("A (initial drop)", f"{A:.4f}")
     st.metric("k (rate per day)", f"{k:.4f}")
     st.metric("C (long‑term angle)", f"{C:.4f}°")
