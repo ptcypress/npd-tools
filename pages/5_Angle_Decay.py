@@ -1,84 +1,249 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from datetime import datetime
-import seaborn as sns
+from datetime import datetime, timedelta
+from io import StringIO
 
-# Apply consistent styling
-sns.set_style("whitegrid")
-mpl.rcParams.update({
-    'font.size': 10,
-    'axes.titlesize': 12,
-    'axes.labelsize': 11,
-    'xtick.labelsize': 9,
-    'ytick.labelsize': 9,
-    'legend.fontsize': 9,
-})
-# --- App title ---
-st.title("Angle Stabilization Over Time")
-
-# --- Load Data ---
-csv_path = "data/angle_decay.csv"  # Adjust if needed
-df = pd.read_csv(csv_path)
-
-# Add year and convert date
-df["Date"] = pd.to_datetime(df["Date"] + "-2024", format="%d-%b-%Y")
-df["Day"] = (df["Date"] - df["Date"].min()).dt.days
-
-# Prepare x/y
-x_data = df["Day"].values
-y_data = df["Angle"].values
-
-# --- Define exponential decay model ---
-def decay_model(x, a, b, c):
-    return a * np.exp(-b * x) + c
-
-# --- Fit model ---
-popt, pcov = curve_fit(decay_model, x_data, y_data, p0=(3, 0.05, 19))
-a, b, c = popt  # c is the long-term minimum
-min_angle = c
-
-# --- Generate smooth prediction curve ---
-x_pred = np.linspace(0, 100, 300)
-y_pred = decay_model(x_pred, *popt)
-model_dates = df["Date"].min() + pd.to_timedelta(x_pred, unit='D')
-
-# --- Plot ---
-fig, ax = plt.subplots(figsize=(10, 5))
-
-# Plot observed data and model
-ax.plot(df["Date"], y_data, 'o', label="Observed", color="blue")
-ax.plot(model_dates, y_pred, '-', label="Exponential Fit", color="black")
-
-# Horizontal line for predicted long-term minimum
-ax.axhline(min_angle, color='red', linestyle='--', linewidth=1)
-
-# Annotate predicted minimum on right side of plot
-rightmost_date = df["Date"].max() + pd.Timedelta(days=5)
-ax.annotate(
-    f"Predicted Long-Term\nMinimum ≈ {min_angle:.2f}°",
-    xy=(rightmost_date, min_angle),
-    xytext=(0, 0),
-    textcoords="offset points",
-    fontsize=10,
-    color="red",
-    ha='left',
-    va='bottom'
+# ---------------------------
+# Page config (match other pages)
+# ---------------------------
+st.set_page_config(
+    page_title="Angle Decay Model",
+    page_icon="📉",
+    layout="wide",
 )
 
-# Final formatting
-ax.set_ylabel("Angle (°)")
-ax.set_xlabel("Date")
-ax.grid(True)
-ax.legend()
+# Optional: minimal style tweaks to match look/feel
+st.markdown(
+    """
+    <style>
+    /* Tighten top padding, match other pages spacing */
+    .block-container { padding-top: 1.2rem; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# --- Display plot and summary ---
-st.pyplot(fig, use_container_width=True)
-st.markdown(f"### 📉 Predicted Long-Term Minimum Angle: **{min_angle:.3f}°**")
+# ---------------------------
+# Utilities
+# ---------------------------
 
-# --- Optional raw data view ---
-with st.expander("Show Raw Data"):
-    st.dataframe(df[["Date", "Angle"]])
+def _to_days(series: pd.Series) -> np.ndarray:
+    """Convert a datetime series to day offsets from the first timestamp (t=0 at first row)."""
+    t0 = series.min()
+    return (series - t0).dt.total_seconds().to_numpy() / 86400.0
+
+
+def _exp_decay(t, A, k, C):
+    """Exponential decay: y = A * exp(-k*t) + C"""
+    return A * np.exp(-k * t) + C
+
+
+def fit_exp_decay(df: pd.DataFrame, date_col: str, angle_col: str):
+    """Robustly fit exponential decay returning params and fitted curve.
+    Falls back to a simple grid search if scipy isn't available.
+    """
+    t = _to_days(df[date_col])
+    y = df[angle_col].to_numpy()
+
+    # Initial guesses
+    A0 = max(y) - min(y)
+    k0 = 0.1 if len(df) < 8 else 1.0 / (t[-1] - t[0] + 1e-9)
+    C0 = min(y)
+
+    try:
+        from scipy.optimize import curve_fit
+
+        popt, pcov = curve_fit(
+            _exp_decay, t, y, p0=[A0, k0, C0], maxfev=20000, bounds=([-np.inf, 0, -np.inf], [np.inf, np.inf, np.inf])
+        )
+        A, k, C = popt
+        yhat = _exp_decay(t, A, k, C)
+        return (A, k, C), yhat
+    except Exception:
+        # Fallback: simple coarse-to-fine grid on k and C, solve A in closed-form by least squares
+        k_grid = np.geomspace(1e-3, 5.0, 50)
+        C_grid = np.linspace(min(y) - 2.0, max(y), 50)
+        best = None
+        for k in k_grid:
+            e = np.exp(-k * t)
+            X = np.column_stack([e, np.ones_like(e)])  # [A, C]
+            # We'll scan C explicitly and fit A each time
+            for C in C_grid:
+                A = np.linalg.lstsq(e.reshape(-1, 1), (y - C), rcond=None)[0][0]
+                y_pred = A * e + C
+                rss = float(np.sum((y - y_pred) ** 2))
+                if (best is None) or (rss < best[0]):
+                    best = (rss, A, k, C, y_pred)
+        _, A, k, C, yhat = best
+        return (float(A), float(k), float(C)), yhat
+
+
+def stabilization_time(A: float, k: float, C: float, y0: float, eps_deg: float) -> float:
+    """Return t* (in days from t0) when |y(t) - C| <= eps_deg for the first time.
+    If already stable, returns 0.
+    """
+    # y(t) = A*exp(-k t) + C
+    # |A| * exp(-k t) <= eps => exp(-k t) <= eps / |A| => t >= (1/k) * ln(|A|/eps)
+    A_eff = abs(y0 - C) if A == 0 else abs(A)
+    if A_eff <= eps_deg:
+        return 0.0
+    if k <= 0:
+        return np.inf
+    return float(np.log(A_eff / eps_deg) / k)
+
+
+# ---------------------------
+# Sidebar controls
+# ---------------------------
+st.title("Angle Decay (Exponential) 📉")
+st.caption("Fit an exponential decay A·e^{-k t} + C and estimate when the angle stabilizes.")
+
+with st.sidebar:
+    st.header("Inputs")
+    uploaded = st.file_uploader("Data file (CSV)", type=["csv"])    
+    st.markdown("""
+    **Required columns**
+    - `Date` (any parsable date format)
+    - `Angle` (float)
+    Optional: `St Dev` for reference/error bars
+    """)
+
+    default_eps = st.number_input("Stabilization band ± (deg)", min_value=0.01, max_value=5.0, value=0.25, step=0.01)
+    show_points = st.checkbox("Show data points", value=True)
+    show_residuals = st.checkbox("Show residuals", value=False)
+
+# ---------------------------
+# Data loading
+# ---------------------------
+if uploaded is not None:
+    df = pd.read_csv(uploaded)
+else:
+    # Minimal placeholder so the page renders a consistent layout
+    df = pd.DataFrame({
+        "Date": pd.to_datetime([datetime.today() - timedelta(days=d) for d in [21, 14, 7, 0]]),
+        "Angle": [23.5, 22.1, 21.3, 20.9],
+        "St Dev": [0.7, 0.6, 0.5, 0.5],
+    })
+
+# Normalize / validate columns
+expected_cols = {c.lower(): c for c in df.columns}
+if "date" not in expected_cols or "angle" not in expected_cols:
+    st.error("CSV must include `Date` and `Angle` columns.")
+    st.stop()
+
+DATE_COL = expected_cols["date"]
+ANGLE_COL = expected_cols["angle"]
+STD_COL = expected_cols.get("st dev")
+
+# Parse dates
+if not np.issubdtype(df[DATE_COL].dtype, np.datetime64):
+    df[DATE_COL] = pd.to_datetime(df[DATE_COL], errors="coerce")
+
+# Drop NaNs, sort
+_df = df[[DATE_COL, ANGLE_COL] + ([STD_COL] if STD_COL else [])].dropna().sort_values(DATE_COL).reset_index(drop=True)
+
+# ---------------------------
+# Modeling
+# ---------------------------
+params, yhat = fit_exp_decay(_df, DATE_COL, ANGLE_COL)
+A, k, C = params
+
+# Compute stabilization date
+_t = _to_days(_df[DATE_COL])
+y0 = _df[ANGLE_COL].iloc[0]
+t_star_days = stabilization_time(A, k, C, y0, default_eps)
+first_date = _df[DATE_COL].min()
+stabilizes_on = None if not np.isfinite(t_star_days) else (first_date + pd.to_timedelta(t_star_days, unit="D"))
+
+# Build dense curve for plotting
+if len(_df) > 1:
+    t_dense = np.linspace(_t.min(), _t.max() + max(7.0, 0.2 * (_t.max() - _t.min() + 1e-9)), 400)
+else:
+    t_dense = np.linspace(0, 14, 200)
+T0 = _df[DATE_COL].min()
+dates_dense = pd.to_datetime(T0) + pd.to_timedelta(t_dense, unit="D")
+y_dense = _exp_decay(t_dense, A, k, C)
+
+# ---------------------------
+# Main layout
+# ---------------------------
+left, right = st.columns([3, 2], gap="large")
+
+with left:
+    import plotly.graph_objects as go
+    from plotly.colors import qualitative
+
+    fig = go.Figure()
+
+    if show_points:
+        fig.add_trace(
+            go.Scatter(
+                x=_df[DATE_COL], y=_df[ANGLE_COL],
+                mode="markers",
+                name="Observed",
+                marker=dict(size=8),
+            )
+        )
+
+    # Fitted curve
+    fig.add_trace(
+        go.Scatter(
+            x=dates_dense, y=y_dense,
+            mode="lines",
+            name="Fit: A·e^{-k t} + C",
+        )
+    )
+
+    # Asymptote C
+    fig.add_hline(y=C, line_dash="dot", annotation_text=f"Asymptote C = {C:.3f}°", annotation_position="top left")
+
+    # Stabilization band
+    fig.add_hline(y=C + default_eps, line_dash="dash", annotation_text=f"+{default_eps:.2f}°", annotation_position="top right")
+    fig.add_hline(y=C - default_eps, line_dash="dash", annotation_text=f"-{default_eps:.2f}°", annotation_position="bottom right")
+
+    # Stabilization date marker
+    if stabilizes_on is not None and stabilizes_on >= _df[DATE_COL].min():
+        fig.add_vline(x=stabilizes_on, line_dash="dot", annotation_text=f"Stabilizes ≈ {stabilizes_on.date()}", annotation_position="top")
+
+    fig.update_layout(
+        template="plotly_white",
+        height=520,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=10, r=10, t=30, b=10),
+        xaxis_title="Date",
+        yaxis_title="Angle (deg)",
+        colorway=qualitative.Set2,  # match palette used elsewhere
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+with right:
+    st.subheader("Model summary")
+    st.metric("A (initial drop)", f"{A:.4f}")
+    st.metric("k (rate per day)", f"{k:.4f}")
+    st.metric("C (long‑term angle)", f"{C:.4f}°")
+    if stabilizes_on is None or not np.isfinite(t_star_days):
+        st.info("Model does not stabilize with current parameters (k≤0).")
+    else:
+        st.metric("Stabilizes by", stabilizes_on.strftime("%Y-%m-%d"))
+        st.caption(f"Within ±{default_eps:.2f}° of C by ~{t_star_days:.1f} days after first measurement.")
+
+    with st.expander("Data preview"):
+        st.dataframe(_df, use_container_width=True, height=240)
+
+# ---------------------------
+# Residuals (optional)
+# ---------------------------
+if show_residuals:
+    import plotly.graph_objects as go
+    res_fig = go.Figure()
+    residuals = _df[ANGLE_COL] - _exp_decay(_t, A, k, C)
+    res_fig.add_trace(go.Scatter(x=_df[DATE_COL], y=residuals, mode="markers+lines", name="Residuals"))
+    res_fig.update_layout(template="plotly_white", height=280, margin=dict(l=10, r=10, t=30, b=10), xaxis_title="Date", yaxis_title="Residual (deg)")
+    st.plotly_chart(res_fig, use_container_width=True)
+
+# ---------------------------
+# Notes
+# ---------------------------
+st.caption("Formatting aligned with other pages: set_page_config(layout='wide'), controls in sidebar, Plotly charts with 'plotly_white' template and qualitative.Set2 palette, container_width charts, and consistent spacing.")
