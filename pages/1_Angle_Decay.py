@@ -324,7 +324,7 @@ with right:
     #st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
     #st.metric("A (initial drop)", f"{A:.4f}")
     #st.metric("k (rate per day)", f"{k:.4f}")
-    st.metric("C (long‑term angle)", f"{C:.3f}°")
+    st.metric("Projected Angle", f"{C:.3f}°")
     if stabilizes_on is None or not np.isfinite(t_star_days):
         st.info("Model does not stabilize with current parameters (k≤0).")
     else:
