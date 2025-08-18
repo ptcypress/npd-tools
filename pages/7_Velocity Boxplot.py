@@ -5,10 +5,10 @@ from plotly.colors import qualitative
 
 # Set up the Streamlit page
 st.set_page_config(page_title="Brush Velocity Boxplots", layout="wide")
-st.title("Velocity Distribution by Brush Type")
+st.title("Object Velocity Distribution by Brush Type")
 
 st.caption("""
-This boxplot shows the velocity distributions for different brush types. Each box represents the spread of velocity 
+This boxplot shows the velocity distributions of different objects for different brush types. Each box represents the spread of velocity 
 measurements for that brush. Use this to compare consistency and central tendency across brush types.
 """)
 
