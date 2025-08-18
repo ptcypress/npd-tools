@@ -10,7 +10,7 @@ st.title("New Product Development - AngleOn™ & AngleOn XT")
 st.markdown("---")
 
 st.markdown("""
-This is a collection of interactive engineering analyses specific to angle brush development.  
+This is a collection of engineering analyses specific to angle brush development.  
 Use the sidebar on the left to navigate between apps:
 
 -  **Physical Characteristics:**
@@ -26,6 +26,7 @@ Use the sidebar on the left to navigate between apps:
    
 ---
 """)
+
 
 
 
