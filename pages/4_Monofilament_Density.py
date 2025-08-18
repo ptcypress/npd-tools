@@ -100,6 +100,6 @@ with col2:
 #else:
     #density, diameter = PRESETS[preset]
 
-positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
+#positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
 fig = draw_monofilament(positions, diameter, preset, density, total_area, percent_coverage)
 st.pyplot(fig)
