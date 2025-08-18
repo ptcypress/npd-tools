@@ -141,5 +141,5 @@ else:
         )
 
         # Text below chart
-        st.markdown(f"This chart shows the cumulative **material loss** of AngleOn™ and Competitor product in terms of **{unit_choice}**. Lower values indicate greater durability.")
+        st.caption(f"This chart shows the cumulative **material loss** of AngleOn™ and Competitor product in terms of **{unit_choice}**. Lower values indicate greater durability.")
         st.plotly_chart(fig, use_container_width=True)
