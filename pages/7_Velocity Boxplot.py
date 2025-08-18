@@ -7,7 +7,7 @@ from plotly.colors import qualitative
 st.set_page_config(page_title="Brush Velocity Boxplots", layout="wide")
 st.title("Velocity Distribution by Brush Type")
 
-st.write("""
+st.caption("""
 This boxplot shows the velocity distributions for different brush types. Each box represents the spread of velocity 
 measurements for that brush. Use this to compare consistency and central tendency across brush types.
 """)
