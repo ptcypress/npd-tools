@@ -97,8 +97,8 @@ with col2:
     #with col3:
         #density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
         #diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
-else:
-    density, diameter = PRESETS[preset]
+#else:
+    #density, diameter = PRESETS[preset]
 
 positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
 fig = draw_monofilament(positions, diameter, preset, density, total_area, percent_coverage)
