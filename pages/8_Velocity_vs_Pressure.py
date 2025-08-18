@@ -10,8 +10,8 @@ import os
 
 # Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
-st.title("Regression Comparison - AngleOn™ vs Competitor")
-st.subheader("Velocity vs Pressure")
+st.title("Object Velocity vs Pressure - AngleOn™, Competitor")
+#st.subheader("Velocity vs Pressure")
 
 # Load data
 csv_path = "data/velocity_data.csv"
@@ -137,5 +137,5 @@ else:
             )
         )
 
-        st.markdown("This chart compares the velocity output of AngleOn™ and Competitor product over a range of pressures. The shaded area quantifies total performance advantage.")
+        st.caption("This chart compares the velocity output of AngleOn™ and Competitor product over a range of pressures. The shaded area quantifies total performance advantage.")
         st.plotly_chart(fig, use_container_width=True)
