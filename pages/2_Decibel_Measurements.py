@@ -56,7 +56,7 @@ fig.add_shape(
 )
 fig.add_annotation(
     x=0, xref="paper", y=85, yref="y",
-    text="OSHA TWA Action Level (85 dBA)", showarrow=False, xanchor="right", yshift=6
+    text="OSHA TWA Action Level (85 dBA)", showarrow=False, xanchor="left", yshift=55
 )
 
 fig.update_layout(
