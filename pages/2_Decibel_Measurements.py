@@ -49,14 +49,19 @@ fig = go.Figure()
 for col in numeric_cols:
     fig.add_trace(go.Scatter(x=x, y=df[col], mode="lines", name=col))
 
-# OSHA TWA Action Level line at 85 dBA
-fig.add_shape(
-    type="line", xref="paper", x0=0, x1=1, yref="y", y0=85, y1=85,
-    line=dict(dash="dash", width=2)
-)
-fig.add_annotation(
-    x=0, xref="paper", y=85, yref="y",
-    text="OSHA TWA Action Level (85 dBA)", showarrow=False, xanchor="left", yshift=55
+# OSHA TWA Action Level line at 85 dBA (legend-visible)
+if len(df) > 0:
+    if hasattr(x, "iloc"):
+        x0, x1 = x.iloc[0], x.iloc[-1]
+    else:
+        x0, x1 = x[0], x[-1]
+    fig.add_trace(
+        go.Scatter(
+            x=[x0, x1], y=[85, 85], mode="lines",
+            name="OSHA TWA Action Level (85 dBA)",
+            line=dict(dash="dash", width=2)
+        )
+    )", showarrow=False, xanchor="left", yshift=6
 )
 
 fig.update_layout(
