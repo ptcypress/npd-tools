@@ -1,66 +1,59 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from plotly.colors import qualitative
 
-# ---- Page config ----
-st.set_page_config(page_title="Velocity Boxplot", layout="wide")
-st.title("Velocity Boxplot — Simple")
+# Set up the Streamlit page
+st.set_page_config(page_title="Brush Velocity Boxplots", layout="wide")
+st.title("Velocity Distribution by Brush Type")
 
-CSV = "data/velocity_data.csv"
-try:
-    df = pd.read_csv(CSV)
-except FileNotFoundError:
-    st.error(f"File not found: {CSV}")
-    st.stop()
-except Exception as e:
-    st.error(f"Couldn't read {CSV}: {e}")
-    st.stop()
+st.caption("""
+This boxplot shows the velocity distributions for different brush types. Each box represents the spread of velocity 
+measurements for that brush. Use this to compare consistency and central tendency across brush types.
+""")
 
-# ---- Assume common headers; fall back gracefully ----
-# Preferred columns
-group_col = "Brush" if "Brush" in df.columns else None
-value_col = "Velocity" if "Velocity" in df.columns else None
+# Load the CSV file
+df = pd.read_csv("data/Velocity_Boxplots.csv")  # assumes file is in 'data/' folder
 
-# If missing, pick first categorical and first numeric
-if group_col is None:
-    cat_cols = [c for c in df.columns if df[c].dtype == "object"]
-    group_col = cat_cols[0] if cat_cols else df.columns[0]
-if value_col is None:
-    num_cols = df.select_dtypes(include="number").columns.tolist()
-    if not num_cols:
-        st.error("No numeric column found for values.")
-        st.stop()
-    value_col = num_cols[0]
+# Show the raw columns for debugging
+#st.subheader("Raw CSV Columns")
+#st.write(df.columns)
+#st.write(f"Number of columns: {len(df.columns)}")
 
-# Drop NA and compute order by median for a clean, intuitive ranking
-clean = df[[group_col, value_col]].dropna()
-order = (
-    clean.groupby(group_col)[value_col]
-    .median()
-    .sort_values()
-    .index.tolist()
-)
+# Rename columns for clarity (optional)
+df.columns = ["AngleOn™", "XT10", "XT16", "Competitor"]
 
-# ---- Minimal boxplot (no jitter, no extra adornments) ----
+# Convert wide to long format
+df_long = df.melt(var_name="Brush Type", value_name="Velocity (in/sec)")
+
+# Clean brush names (optional)
+df_long["Brush Type"] = df_long["Brush Type"].str.replace("-Velocity", "")
+
+# Define consistent color palette
+color_sequence = qualitative.Plotly
+brush_order = ["AngleOn™", "XT10", "XT16", "Competitor"]  # adjust as needed
+
+# Plot
 fig = px.box(
-    clean,
-    x=group_col,
-    y=value_col,
-    category_orders={group_col: order},
-    points=False,            # keep it clean
-    template="plotly_white",
+    df_long,
+    x="Brush Type",
+    y="Velocity (in/sec)",
+    color="Brush Type",
+    color_discrete_sequence=color_sequence,
+    category_orders={"Brush Type": sorted(df_long["Brush Type"].unique())},  # optional consistent order
+    points="all",  # show all data points
+    template="plotly_white"
 )
 
+# Layout tweaks
 fig.update_layout(
-    height=480,
-    margin=dict(l=40, r=20, t=20, b=40),
-    showlegend=False,
-    xaxis_title=None,
-    yaxis_title=value_col,
+    title="Velocity Distributions by Brush Type",
+    xaxis_title="Brush Type",
+    yaxis_title="Velocity (in/sec)",
+    legend_title="Brush Type",
+    height=600,
+    showlegend=False
 )
 
-# Subtle grid only
-fig.update_xaxes(showgrid=False)
-fig.update_yaxes(showgrid=True, gridcolor="rgba(0,0,0,0.06)")
-
+# Display the plot
 st.plotly_chart(fig, use_container_width=True)
