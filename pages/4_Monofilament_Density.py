@@ -6,7 +6,7 @@ import numpy as np
 # Preset filament configurations
 # ---------------------------
 PRESETS = {
-    "Custom": None,
+    #"Custom": None,
     "AngleOn™ (6910 epi², 0.006\")": (6910, 0.006),
     "Competitor (9750 epi², 0.0045\")": (9750, 0.0045),
     "XT10 (2275 epi², 0.010\")": (2275, 0.010),
