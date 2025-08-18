@@ -46,10 +46,10 @@ y_max = max(max(y_pred_angleon), max(y_pred_competitor)) * 1.05
 # Streamlit layout
 st.set_page_config(page_title="Durability vs Belt Speed", layout="wide")
 st.title("Accelerated Wear Test - AngleOn™ vs. Competitor")
-st.subheader("Rate of Material Loss vs Belt Speed")
+#st.subheader("Rate of Material Loss vs Belt Speed")
 
 # Explanatory text
-st.markdown("""
+st.caption("""
 This chart compares the **rate of material loss** across belt speeds for AngleOn™ and Competitor product.
 The shaded area between the curves, from **6.3 to 50 in/sec**, represents the **cumulative durability advantage** of one material over the other.
 Lower material loss indicates superior wear resistance under accelerated wear conditions. Accelerated wear test designed to mimic real-use testing 
