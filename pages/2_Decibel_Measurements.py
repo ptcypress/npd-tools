@@ -57,12 +57,13 @@ if len(df) > 0:
         x0, x1 = x[0], x[-1]
     fig.add_trace(
         go.Scatter(
-            x=[x0, x1], y=[85, 85], mode="lines",
+            x=[x0, x1],
+            y=[85, 85],
+            mode="lines",
             name="OSHA TWA Action Level (85 dBA)",
             line=dict(dash="dash", width=2)
         )
-    )", showarrow=False, xanchor="left", yshift=6
-)
+    )
 
 fig.update_layout(
     template="plotly_white",
