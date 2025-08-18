@@ -10,7 +10,7 @@ import os
 
 # Streamlit page setup
 st.set_page_config(page_title="Velocity vs Pressure", layout="wide")
-st.title("Object Velocity vs Pressure - AngleOn™, Competitor")
+st.title("Object Velocity vs Pressure - AngleOn™ vs Competitor")
 #st.subheader("Velocity vs Pressure")
 
 # Load data
