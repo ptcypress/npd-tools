@@ -7,6 +7,7 @@ st.set_page_config(page_title="Decibel Measurements", layout="wide")
 
 # --- Title ---
 st.title("Decibel Measurements")
+st.caption("Use the sidebar to add/remove brush types.")
 
 # --- Read CSV ---
 CSV_PATH = "data/decibel_measurements.csv"
