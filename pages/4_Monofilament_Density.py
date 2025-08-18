@@ -80,8 +80,10 @@ def draw_monofilament(positions, diameter, title, density, total_area, percent_c
 # ---------------------------
 # Streamlit UI
 # ---------------------------
-st.set_page_config(page_title="Monofilament Pattern Viewer", layout="centered")
-st.title("Monofilament Pattern Visualizer")
+st.set_page_config(page_title="Monofilament Density Viewer", layout="centered")
+st.title("Monofilament Density Visualizer")
+st.caption("""This is a scaled visualizer showing density of different brush types given 
+their density (epi²) and monofilament diameter (in).""")
 
 # Layout
 col1, col2, col3 = st.columns(3)
@@ -91,10 +93,10 @@ with col1:
 with col2:
     preset = st.selectbox("Choose Preset", list(PRESETS.keys()))
 
-if preset == "Custom":
-    with col3:
-        density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
-        diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
+#if preset == "Custom":
+    #with col3:
+        #density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
+        #diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
 else:
     density, diameter = PRESETS[preset]
 
