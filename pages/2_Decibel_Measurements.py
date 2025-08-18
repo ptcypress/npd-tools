@@ -15,7 +15,6 @@ st.caption("Clean, consistent visuals with quick metrics and an intuitive timeâ€
 # Sidebar controls (kept minimal to match other pages)
 # ---------------------------
 st.sidebar.header("Options")
-", type=["csv"]) 
 show_raw = st.sidebar.checkbox("Show raw trace", value=False)
 smooth_sec = st.sidebar.number_input("Smoothing window (seconds)", min_value=0, value=5, step=1, help="0 = no smoothing; uses centered rolling average.")
 show_limits = st.sidebar.checkbox("Show OSHA/NIOSH bands", value=True)
