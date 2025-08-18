@@ -7,7 +7,7 @@ from plotly.colors import qualitative
 st.set_page_config(page_title="Monofilament Coverage", layout="wide")
 st.title("Monofilament Coverage")
 
-st.write("""
+st.caption("""
 Use the sliders in the sidebar to explore how different EPI² values affect theoretical coverage
 over a range of filament diameters. Preloaded values represent actual material densities & monofilament diameters""")
 
