@@ -329,7 +329,7 @@ with right:
         st.info("Model does not stabilize with current parameters (k≤0).")
     else:
         st.metric("Projected Stabilization Date", stabilizes_on.strftime("%Y-%m-%d"))
-        st.caption(f"Within +{default_eps:.2f}° of asymptote by ~{t_star_days:.1f} days after first measurement.")
+        st.caption(f"Within +{default_eps:.2f}° of asymptote ~{t_star_days:.1f} days after first measurement.")
 
     #with st.expander("Data preview"):
         #st.dataframe(_df, use_container_width=True, height=240)
