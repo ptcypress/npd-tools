@@ -83,7 +83,7 @@ def draw_monofilament(positions, diameter, title, density, total_area, percent_c
 st.set_page_config(page_title="Monofilament Density Viewer", layout="centered")
 st.title("Monofilament Density Visualizer")
 st.caption("""This is a scaled visualizer showing density of different brush types given 
-their density (epi²) and monofilament diameter (in).""")
+their density (epi²) and monofilament diameter (in) within one square inch of brush.""")
 
 # Layout
 col1, col2, col3 = st.columns(3)
