@@ -288,11 +288,11 @@ with left:
     )
 
     # Asymptote C
-    fig.add_hline(y=C, line_dash="dot", annotation_text=f"Asymptote C = {C:.3f}°", annotation_position="top left")
+    #fig.add_hline(y=C, line_dash="dot", annotation_text=f"Asymptote C = {C:.3f}°", annotation_position="top left")
 
     # Stabilization band
-    fig.add_hline(y=C + default_eps, line_dash="dash", annotation_text=f"+{default_eps:.2f}°", annotation_position="top right")
-    fig.add_hline(y=C - default_eps, line_dash="dash", annotation_text=f"-{default_eps:.2f}°", annotation_position="bottom right")
+    fig.add_hline(y=C + default_eps, line_dash="dot", annotation_text=f"+{default_eps:.2f}°", annotation_position="top right")
+    #fig.add_hline(y=C - default_eps, line_dash="dash", annotation_text=f"-{default_eps:.2f}°", annotation_position="bottom right")
 
     # Stabilization date marker (avoid Plotly datetime+annotation bug by separating line and annotation)
     if stabilizes_on is not None and stabilizes_on >= _df[DATE_COL].min():
@@ -318,7 +318,7 @@ with right:
     st.subheader("Model summary")
     # Equation & fit quality
     equation_text = f"y(t) = {A:.6f} · exp(-{k:.6f} · t) + {C:.6f}"
-    st.markdown("**Equation (t in days since first measurement):**")
+    st.markdown("**Equation:**")
     st.code(equation_text, language="text")
     st.metric("R² Adj.", f"{r2:.4f}")
     #st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
