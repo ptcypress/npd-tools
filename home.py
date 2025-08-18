@@ -2,11 +2,11 @@ import streamlit as st
 
 st.set_page_config(
     page_title="New Product Development",
-    page_icon="🧰",
+    #page_icon="🧰",
     layout="wide"
 )
 
-st.title("🧰 New Product Development - AngleOn™ & AngleOn XT")
+st.title("New Product Development - AngleOn™ & AngleOn XT")
 st.markdown("---")
 
 st.markdown("""
@@ -28,6 +28,7 @@ Use the sidebar on the left to navigate between apps:
     
 ---
 """)
+
 
 
 
