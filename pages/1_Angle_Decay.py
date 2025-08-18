@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # ---------------------------
 st.set_page_config(
     page_title="Angle Decay Model",
-    page_icon="📉",
+    #page_icon="📉",
     layout="wide",
 )
 
@@ -95,8 +95,11 @@ def stabilization_time(A: float, k: float, C: float, y0: float, eps_deg: float) 
 # ---------------------------
 # Sidebar controls
 # ---------------------------
-st.title("Angle Decay (Exponential) 📉")
-st.caption("Fit an exponential decay A·e^{-k t} + C and estimate when the angle stabilizes.")
+st.title("Angle Decay - AngleOn™")
+st.caption("""Angle measurements were recorded over the course of a month and a half. A slight 
+relaxation in monofilament angle was observed. The plot below shows all observed measurements, 
+and an exponential regression fit with projection. An estimated angle and stabilization date is 
+included below.""")
 
 # (No sidebar controls needed)
 # Defaults used for consistency across pages
@@ -317,19 +320,19 @@ with right:
     equation_text = f"y(t) = {A:.6f} · exp(-{k:.6f} · t) + {C:.6f}"
     st.markdown("**Equation (t in days since first measurement):**")
     st.code(equation_text, language="text")
-    st.metric("R²", f"{r2:.4f}")
-    st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
-    st.metric("A (initial drop)", f"{A:.4f}")
-    st.metric("k (rate per day)", f"{k:.4f}")
+    st.metric("R² Adj.", f"{r2:.4f}")
+    #st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
+    #st.metric("A (initial drop)", f"{A:.4f}")
+    #st.metric("k (rate per day)", f"{k:.4f}")
     st.metric("C (long‑term angle)", f"{C:.4f}°")
     if stabilizes_on is None or not np.isfinite(t_star_days):
         st.info("Model does not stabilize with current parameters (k≤0).")
     else:
-        st.metric("Stabilizes by", stabilizes_on.strftime("%Y-%m-%d"))
+        st.metric("Projected Stabilization Date", stabilizes_on.strftime("%Y-%m-%d"))
         st.caption(f"Within ±{default_eps:.2f}° of C by ~{t_star_days:.1f} days after first measurement.")
 
-    with st.expander("Data preview"):
-        st.dataframe(_df, use_container_width=True, height=240)
+    #with st.expander("Data preview"):
+        #st.dataframe(_df, use_container_width=True, height=240)
 
 # ---------------------------
 # Notes
