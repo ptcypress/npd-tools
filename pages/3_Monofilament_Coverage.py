@@ -5,11 +5,11 @@ from plotly.colors import qualitative
 
 # App setup
 st.set_page_config(page_title="Monofilament Coverage", layout="wide")
-st.title("Monofilament Coverage: Percent Area vs EPI² & Filament Diameter")
+st.title("Monofilament Coverage")
 
 st.write("""
 Use the sliders in the sidebar to explore how different EPI² values affect theoretical coverage
-over a range of filament diameters.""")
+over a range of filament diameters. Preloaded values represent actual material densities & monofilament diameters""")
 
 # Sidebar controls
 st.sidebar.header("EPI² Values (ends per inch squared)")
