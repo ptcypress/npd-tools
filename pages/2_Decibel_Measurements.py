@@ -16,22 +16,9 @@ except Exception as e:
     st.error(f"Couldn't read {CSV_PATH}: {e}")
     st.stop()
 
-# --- Pick columns (simple rules) ---
+# --- Identify time column (optional) ---
 cols_lower = {c.lower(): c for c in df.columns}
-# y/level column
-level_col = None
-for c in ["dba", "db", "level", "spl", "value"]:
-    if c in cols_lower:
-        level_col = cols_lower[c]
-        break
-if level_col is None:
-    if len(df.columns) >= 2:
-        level_col = df.columns[1]
-    else:
-        st.error("Need a decibel column (e.g., dBA, dB, level).")
-        st.stop()
-
-# x/time column
+time_col = None
 if "timestamp" in cols_lower:
     time_col = cols_lower["timestamp"]
     try:
@@ -42,17 +29,43 @@ if "timestamp" in cols_lower:
 else:
     x = df.index
 
-# --- Simple line chart ---
-fig = go.Figure(
-    go.Scatter(x=x, y=df[level_col], mode="lines", name=level_col)
+# --- Choose series to plot: all numeric columns except timestamp ---
+# Try to coerce likely level columns to numeric if needed
+likely_level_names = [c for c in df.columns if any(k in c.lower() for k in ["dba", "dbc", "db", "spl", "level", "value"]) ]
+for c in likely_level_names:
+    if not pd.api.types.is_numeric_dtype(df[c]):
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+
+numeric_cols = df.select_dtypes(include="number").columns.tolist()
+if time_col in numeric_cols:
+    numeric_cols.remove(time_col)
+
+if not numeric_cols:
+    st.error("No numeric decibel columns found to plot. Add columns like dBA, dB, SPL, or Level.")
+    st.stop()
+
+# --- Build figure with all numeric series ---
+fig = go.Figure()
+for col in numeric_cols:
+    fig.add_trace(go.Scatter(x=x, y=df[col], mode="lines", name=col))
+
+# OSHA TWA Action Level line at 85 dBA
+fig.add_shape(
+    type="line", xref="paper", x0=0, x1=1, yref="y", y0=85, y1=85,
+    line=dict(dash="dash", width=2)
 )
+fig.add_annotation(
+    x=0, xref="paper", y=85, yref="y",
+    text="OSHA TWA Action Level (85 dBA)", showarrow=False, xanchor="left", yshift=6
+)
+
 fig.update_layout(
     template="plotly_white",
-    height=440,
+    height=460,
     margin=dict(l=40, r=20, t=20, b=40),
-    legend=dict(orientation="h", x=0, y=1.1, bgcolor="rgba(0,0,0,0)"),
+    legend=dict(orientation="h", x=0, y=1.12, bgcolor="rgba(0,0,0,0)"),
     xaxis_title=None,
-    yaxis_title="dB(A)" if level_col.lower()=="dba" else "dB",
+    yaxis_title="dB",
 )
 
 st.plotly_chart(fig, use_container_width=True)
