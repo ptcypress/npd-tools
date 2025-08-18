@@ -44,9 +44,29 @@ if not numeric_cols:
     st.error("No numeric decibel columns found to plot. Add columns like dBA, dB, SPL, or Level.")
     st.stop()
 
-# --- Build figure with all numeric series ---
+# --- Select which columns to show ---
+REQUIRED = ["Ambient", "Empty Feeder", "Full Feeder"]
+# Only keep those that actually exist & are numeric
+required_present = [c for c in REQUIRED if c in numeric_cols]
+
+# Optional pool = all other numeric series
+optional_pool = [c for c in numeric_cols if c not in REQUIRED]
+# Sidebar multiselect to choose optional series; default to show all optional
+selected_optional = st.sidebar.multiselect(
+    "Optional series",
+    options=optional_pool,
+    default=optional_pool,
+)
+
+# --- Build figure ---
 fig = go.Figure()
-for col in numeric_cols:
+
+# Add required series first (always shown)
+for col in required_present:
+    fig.add_trace(go.Scatter(x=x, y=df[col], mode="lines", name=col))
+
+# Add user-selected optional series
+for col in selected_optional:
     fig.add_trace(go.Scatter(x=x, y=df[col], mode="lines", name=col))
 
 # OSHA TWA Action Level line at 85 dBA (legend-visible)
@@ -71,7 +91,7 @@ fig.update_layout(
     margin=dict(l=40, r=20, t=20, b=40),
     legend=dict(orientation="h", x=0, y=1.12, bgcolor="rgba(0,0,0,0)"),
     xaxis_title=None,
-    yaxis_title="dBA",
+    yaxis_title="dB",
 )
 
 st.plotly_chart(fig, use_container_width=True)
