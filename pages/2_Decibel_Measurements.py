@@ -64,7 +64,7 @@ fig.update_layout(
 )
 
 # Streamlit display
-st.title("Decibel Measurement Visualization")
-st.markdown("Ambient and Empty Feeder represents sound pressure measurements with feeder off/on. Full Feeder and Full feeder w/ AngleOn™ used (25) 1/2-13 nuts as media tested.")
+st.title("Decibel Measurement - AngleOn™")
+st.markdown("Ambient and Empty Feeder plots represents sound pressure measurements with feeder off/on. Full Feeder and Full feeder w/ AngleOn™ used (25) 1/2-13 nuts as media tested.")
 st.plotly_chart(fig, use_container_width=True)
 
