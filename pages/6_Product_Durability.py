@@ -8,7 +8,7 @@ import os
 
 # Streamlit page config
 st.set_page_config(page_title="Material Loss Over Time", layout="wide")
-st.title("Product Durability - AngleOn™")
+st.title("Product Durability - AngleOn™ vs. Competitor")
 
 # Radio button to choose unit
 unit_choice = st.radio("Select Y-axis unit:", ["Mat'l Loss (%)", "Mat'l Loss (in)"])
