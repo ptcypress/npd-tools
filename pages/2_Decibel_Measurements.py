@@ -71,7 +71,7 @@ fig.update_layout(
     margin=dict(l=40, r=20, t=20, b=40),
     legend=dict(orientation="h", x=0, y=1.12, bgcolor="rgba(0,0,0,0)"),
     xaxis_title=None,
-    yaxis_title="dB",
+    yaxis_title="dBA",
 )
 
 st.plotly_chart(fig, use_container_width=True)
