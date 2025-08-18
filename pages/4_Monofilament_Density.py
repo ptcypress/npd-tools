@@ -6,11 +6,11 @@ import numpy as np
 # Preset filament configurations
 # ---------------------------
 PRESETS = {
-    #"Custom": None,
     "AngleOn™ (6910 epi², 0.006\")": (6910, 0.006),
     "Competitor (9750 epi², 0.0045\")": (9750, 0.0045),
     "XT10 (2275 epi², 0.010\")": (2275, 0.010),
     "XT16 (1135 epi², 0.016\")": (1135, 0.016),
+    "Custom": None
 }
 
 # ---------------------------
@@ -93,13 +93,13 @@ with col1:
 with col2:
     preset = st.selectbox("Choose Preset", list(PRESETS.keys()))
 
-#if preset == "Custom":
-    #with col3:
-        #density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
-        #diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
-#else:
-    #density, diameter = PRESETS[preset]
+if preset == "Custom":
+    with col3:
+        density = st.slider("Filament Density (ends/in²)", 1000, 12000, 6912, step=10)
+        diameter = st.slider("", 0.002, 0.02, 0.006, step=0.0005)
+else:
+    density, diameter = PRESETS[preset]
 
-#positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
+positions, total_area, percent_coverage = generate_monofilament_data(density, diameter, pattern)
 fig = draw_monofilament(positions, diameter, preset, density, total_area, percent_coverage)
 st.pyplot(fig)
