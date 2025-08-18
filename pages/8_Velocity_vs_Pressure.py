@@ -138,5 +138,5 @@ else:
         )
 
         st.caption("""This chart compares the velocity output of AngleOn™ and Competitor product over a range of pressures. 
-        The shaded area quantifies total performance advantage.""")
+        The shaded area quantifies cumulative performance advantage.""")
         st.plotly_chart(fig, use_container_width=True)
