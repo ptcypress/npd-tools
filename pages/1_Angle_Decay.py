@@ -320,7 +320,7 @@ with right:
     equation_text = f"y(t) = {A:.6f} · exp(-{k:.6f} · t) + {C:.6f}"
     st.markdown("**Equation:**")
     st.code(equation_text, language="text")
-    st.metric("R² Adj.", f"{r2:.4f}")
+    st.metric("R² Adj.", f"{r2:.3f}")
     #st.caption(f"Adj. R² = {adj_r2:.4f}, RMSE = {rmse:.4f}°, n = {_n}")
     #st.metric("A (initial drop)", f"{A:.4f}")
     #st.metric("k (rate per day)", f"{k:.4f}")
@@ -329,7 +329,7 @@ with right:
         st.info("Model does not stabilize with current parameters (k≤0).")
     else:
         st.metric("Projected Stabilization Date", stabilizes_on.strftime("%Y-%m-%d"))
-        st.caption(f"Within +{default_eps:.2f}° of C by ~{t_star_days:.1f} days after first measurement.")
+        st.caption(f"Within +{default_eps:.2f}° of asymptote by ~{t_star_days:.1f} days after first measurement.")
 
     #with st.expander("Data preview"):
         #st.dataframe(_df, use_container_width=True, height=240)
