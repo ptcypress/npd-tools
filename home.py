@@ -13,21 +13,20 @@ st.markdown("""
 This is a collection of interactive engineering analyses specific to angle brush development.  
 Use the sidebar on the left to navigate between apps:
 
--  **Product Durability:**
-    -  Accelerated Wear Testing
-    -  Product Durability (Calculated Material Life Expectancy)
--  **Product Physical Characteristics:**
-    -  Monofilament Coverage (Comparison of Coverage Area Across Different Brush Types)
-    -  Monofilament Density (Area Covered by Monofilament per Square Inch of Brush)
+-  **Physical Characteristics:**
     -  Angle Decay
--  **Product Functional Characteristics:**  
+    -  Decibel Measurements
+    -  Monofilament Coverage
+    -  Monofilament Density
+-  **Functional Characteristics:**  
+    -  Accelerated Wear Test 
+    -  Product Durability
     -  Velocity Boxplot
     -  Velocity vs Pressure
-    -  Decibel Measurements
-
-    
+   
 ---
 """)
+
 
 
 
