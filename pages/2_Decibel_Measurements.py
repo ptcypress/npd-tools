@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+# Configure page BEFORE any other Streamlit calls
+st.set_page_config(page_title="Decibel Measurements", layout="wide")
+
 # --- Title ---
 st.title("Decibel Measurements")
 
