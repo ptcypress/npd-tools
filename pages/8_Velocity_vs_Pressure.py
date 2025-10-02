@@ -137,6 +137,6 @@ else:
             )
         )
 
-        st.caption("""This chart compares the velocity output of AngleOn™ and Competitor product over a range of pressures. 
+        st.caption("""This chart compares the velocity output of AngleOn™ and Competitor product for a range of pressures exerted by different objects on each brush type. 
         The shaded area quantifies cumulative performance advantage.""")
         st.plotly_chart(fig, use_container_width=True)
